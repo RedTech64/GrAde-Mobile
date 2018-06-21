@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "219651988629",
+    "firebase_url": "https://redtech-grade.firebaseio.com",
+    "project_id": "redtech-grade",
+    "storage_bucket": "redtech-grade.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:219651988629:android:506d0d624cf01be1",
+        "android_client_info": {
+          "package_name": "com.redtech.grade"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "219651988629-3pad8iqp6nj4j9lf7g11tsbut7efd1a7.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "219651988629-3pad8iqp6nj4j9lf7g11tsbut7efd1a7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn9drAe30hVy8LEDZSY2YrvjLBPhKRR8M"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

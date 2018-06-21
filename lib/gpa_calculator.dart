@@ -14,7 +14,7 @@ class GPACalculatorState extends State<GPACalculator> {
   @override
   Widget build(BuildContext context) {
     return new Center(
-      child: new Text("GPA Calculator"),
+      child: new Text("GPA Calculator!"),
     );
   }
 }

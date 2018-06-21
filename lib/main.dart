@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import './grade_average.dart';
 import './gpa_calculator.dart';
+import './settings.dart';
+import './utils/auth.dart';
 
 void main() {
   runApp(new GrAdeApp());
@@ -14,8 +16,7 @@ class GrAdeApp extends StatelessWidget {
       title: 'GrAde',
       home: new MainView(),
       routes: <String, WidgetBuilder> {
-        '/grade_average': (BuildContext context) => new GradeAverage(),
-        '/gpa_calculator': (BuildContext context) => new GPACalculator(),
+        '/settings': (BuildContext context) => new Settings(),
       },
     );
   }
@@ -42,6 +43,13 @@ class MainViewState extends State<MainView> {
       appBar: new AppBar(
         title: new Text('GrAde'),
         backgroundColor: Colors.red,
+        actions: <Widget>[
+          new IconButton(
+            icon: new Icon(Icons.settings),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/settings');
+            }),
+        ],
       ),
       body: _page,
       bottomNavigationBar: new BottomNavigationBar(
@@ -53,6 +61,7 @@ class MainViewState extends State<MainView> {
         currentIndex: _currentIndex,
         onTap: _changePage,
       ),
+      floatingActionButton: new GradeAverageFAB(),
     );
   }
 
