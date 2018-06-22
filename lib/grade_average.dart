@@ -3,6 +3,7 @@ import 'category_dialoge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'category_card.dart';
 import 'utils/auth.dart';
+import 'loading.dart';
 import 'dart:async';
 
 int selectedAverage = 0;
@@ -99,12 +100,11 @@ class GradeAverageState extends State<GradeAverage> {
 
   @override
   Widget build(BuildContext context) {
-    if(userID == null) return new Text('Log In Required');
-    if(dataExists == false) return new Text('Creating Data...');
+    if(userID == null || dataExists == false) return new Loading();
     return new StreamBuilder(
       stream: Firestore.instance.collection('users').document(userID).snapshots(),
       builder: (context, snapshot) {
-        if(!snapshot.hasData) return new Text('Loading....');
+        if(!snapshot.hasData) return new Loading();
         return new SingleChildScrollView(
           child: new Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),

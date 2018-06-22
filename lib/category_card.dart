@@ -9,7 +9,7 @@ class CategoryCard extends StatelessWidget {
   final Category _category;
   final _grades;
 
-  CategoryCard(this._category, this._grades);
+  CategoryCard(this._category,this._grades);
 
   List<Widget> _buildChips(_grades) {
     var list = <Widget>[];
@@ -30,6 +30,7 @@ class CategoryCard extends StatelessWidget {
           onPressed: () {
           },
           onDeleted: () {
+            print(userID);
             final DocumentReference docRef = Firestore.instance.collection('users').document(userID);
             Firestore.instance.runTransaction((transaction) async {
               DocumentSnapshot freshSnap = await transaction.get(docRef);
@@ -51,7 +52,7 @@ class CategoryCard extends StatelessWidget {
     return list;
   }
 
-  Future openEditCategoryDialog(context) async {
+  Future _openEditCategoryDialog(context) async {
     CategoryDialogData category = await Navigator.of(context).push(new MaterialPageRoute<CategoryDialogData>(
       builder: (BuildContext context) {
         return new CategoryDialog(new Category(this._category.name, this._category.weight, this._category.index),true);
@@ -103,7 +104,7 @@ class CategoryCard extends StatelessWidget {
                         child: new IconButton(
                           icon: new Icon(Icons.edit),
                           onPressed: () {
-                            openEditCategoryDialog(context);
+                            _openEditCategoryDialog(context);
                           },
                         ),
                       ),
