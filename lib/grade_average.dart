@@ -7,17 +7,24 @@ import 'loading.dart';
 import 'dart:async';
 
 int selectedAverage = 0;
+var average = [];
+GradeAverageState gradeAverageState;
 
 class GradeAverage extends StatefulWidget {
   @override
-  State createState() => new GradeAverageState();
+  State createState() {
+    gradeAverageState = new GradeAverageState();
+    return gradeAverageState;
+  }
 }
 
 class GradeAverageState extends State<GradeAverage> {
   var _gradeValue = 100.0;
   var _weightValue = 100.0;
   var _selectedCategory = 0;
+  var categories = [];
   bool dataExists = false;
+  int quickUpdate = 0;
   
   @override
   void initState() {
@@ -31,8 +38,72 @@ class GradeAverageState extends State<GradeAverage> {
     super.initState();
   }
 
+  void addGrade() {
+    setState(() {
+      var grades = fixArray(categories[_selectedCategory]['grades']);
+      grades.add({'grade': _gradeValue.floor().toInt(), 'weight': _weightValue.floor().toInt()});
+      quickUpdate = 2;
+      categories[_selectedCategory]['grades'] = grades;
+    });
+  } 
+
+  void deleteGrade(int categoryIndex,int gradeIndex) {
+    setState(() {
+      var grades = fixArray(categories[categoryIndex]['grades']);
+      grades.removeAt(gradeIndex);
+      quickUpdate = 2;
+      categories[categoryIndex]['grades'] = grades;
+    });
+  }
+
+  void addCategory(Category category) {
+    setState(() {
+      categories.add({
+        'name': category.name,
+        'weight': category.weight,
+        'grades': []
+    });
+    quickUpdate = 2;
+  });
+}
+
+void editCategory(Category category) {
+  setState(() {
+     categories[category.index] = {
+       'name': category.name,
+       'weight': category.weight,
+       'grades': []
+     };
+     quickUpdate = 2;
+  });
+}
+
+void deleteCategory(Category category) {
+  setState(() {
+    categories.removeAt(category.index);
+    quickUpdate = 2;
+  });
+}
+
+  void _runTransaction() {
+    print("RUN TRANS");
+    final DocumentReference docRef = Firestore.instance.collection('users').document(userID);
+    var batch = Firestore.instance.batch();
+    average[selectedAverage]['categories'] = categories;
+    batch.updateData(docRef, {
+        'average': average,
+    });
+    batch.commit();
+    Firestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot freshSnap = await transaction.get(docRef);
+      freshSnap['average'][selectedAverage]['categories'] = categories;
+      await transaction.update(docRef, {
+        'average': freshSnap['average'],
+      }); 
+    });
+  }
+
   Future<bool> _setupData() async {
-    print("DATA"+userID);
     DocumentReference docRef = Firestore.instance.collection('users').document(userID);
     DocumentSnapshot data = await docRef.get();
     if(!data.exists || data['average'] == null) {
@@ -68,7 +139,9 @@ class GradeAverageState extends State<GradeAverage> {
   List<Widget> _buildCategoryCards(categories) {
     var list = <Widget>[];
     for(var i = 0; i < categories.length; i++) {
-      list.add(new CategoryCard(new Category(categories[i]['name'],categories[i]['weight'], i), categories[i]['grades']));
+      list.add(new CategoryCard(
+        new Category(categories[i]['name'],categories[i]['weight'], i),
+        categories[i]['grades']));
     }
     return list;
   }
@@ -105,6 +178,10 @@ class GradeAverageState extends State<GradeAverage> {
       stream: Firestore.instance.collection('users').document(userID).snapshots(),
       builder: (context, snapshot) {
         if(!snapshot.hasData) return new Loading();
+        average = snapshot.data['average'];
+        if(quickUpdate == 0) categories = fixArray(snapshot.data['average'][selectedAverage]['categories']);
+        if(quickUpdate != 0) quickUpdate--;
+        if(quickUpdate == 1) _runTransaction();
         return new SingleChildScrollView(
           child: new Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
@@ -127,7 +204,7 @@ class GradeAverageState extends State<GradeAverage> {
                         new Padding(
                           padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
                           child: new Text(
-                            '${_getOverallGrade(snapshot.data['average'][selectedAverage]['categories']).toStringAsFixed(2)}%',
+                            '${_getOverallGrade(categories).toStringAsFixed(2)}%',
                             style: new TextStyle(
                               fontSize: 34.0
                             ),
@@ -137,7 +214,7 @@ class GradeAverageState extends State<GradeAverage> {
                         new Padding(
                           padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
                           child: new Column(
-                            children: _buildCategoryGradeList(snapshot.data['average'][selectedAverage]['categories']),
+                            children: _buildCategoryGradeList(categories),
                           ),
                         ),
                       ],
@@ -211,7 +288,7 @@ class GradeAverageState extends State<GradeAverage> {
                         ),
                         new Divider(),
                         new Wrap(
-                          children: _buildCategoryChips(snapshot.data['average'][selectedAverage]['categories']),
+                          children: _buildCategoryChips(categories),
                         ),
                         new Divider(),
                         new Padding(
@@ -219,16 +296,7 @@ class GradeAverageState extends State<GradeAverage> {
                           child: new RaisedButton(
                             child: new Text('ADD'),
                             onPressed: () {
-                              Firestore.instance.runTransaction((transaction) async {
-                                DocumentSnapshot freshSnap = await transaction.get(Firestore.instance.collection('users').document(userID));
-                                var grades = freshSnap['average'][selectedAverage]['categories'][_selectedCategory]['grades'];
-                                var newGrades = fixArray(grades);
-                                newGrades.add({'grade': _gradeValue.floor().toInt(), 'weight': _weightValue.floor().toInt()});
-                                freshSnap['average'][selectedAverage]['categories'][_selectedCategory]['grades'] = newGrades;
-                                await transaction.update(freshSnap.reference, {
-                                  'average': freshSnap['average'],
-                                });
-                              });
+                              addGrade();
                             },
                           ),
                         ),
@@ -236,7 +304,7 @@ class GradeAverageState extends State<GradeAverage> {
                     ),
                   ),
                   new Column(
-                    children: _buildCategoryCards(snapshot.data['average'][selectedAverage]['categories']),
+                    children: _buildCategoryCards(categories),
                   ),
                 ],
               ),
@@ -317,34 +385,8 @@ Future openCreateCategoryDialog(context) async {
     fullscreenDialog: true
   ));
   if(category != null) {
-    addCategory(new Category(category.name, category.weight, -1));
+    gradeAverageState.addCategory(new Category(category.name, category.weight, -1));
   }
-}
-
-addCategory(Category category) {
-  Firestore.instance.runTransaction((transaction) async {
-    DocumentSnapshot freshSnap = await transaction.get(Firestore.instance.collection('users').document(userID));
-    var categories = freshSnap['average'][selectedAverage]['categories'];
-    var newCategories = fixArray(categories);
-    newCategories.add({'name': category.name, 'weight': category.weight, 'grades': []});
-    freshSnap['average'][selectedAverage]['categories'] = newCategories;
-    await transaction.update(freshSnap.reference, {
-      'average': freshSnap['average'],
-    });
-  });
-}
-
-deleteCategory(Category category) {
-  Firestore.instance.runTransaction((transaction) async {
-    DocumentSnapshot freshSnap = await transaction.get(Firestore.instance.collection('users').document(userID));
-    var categories = freshSnap['average'][selectedAverage]['categories'];
-    var newCategories = fixArray(categories);
-    newCategories.removeAt(category.index);
-    freshSnap['average'][selectedAverage]['categories'] = newCategories;
-    await transaction.update(freshSnap.reference, {
-      'average': freshSnap['average'],
-    });
-  });
 }
 
 List<dynamic> fixArray(array) {

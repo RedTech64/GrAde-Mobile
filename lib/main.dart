@@ -5,6 +5,9 @@ import './gpa_calculator.dart';
 import './settings.dart';
 import './utils/auth.dart';
 
+GradeAverage gradeAverage = new GradeAverage();
+GPACalculator gpaCalculator = new GPACalculator();
+
 void main() {
   runApp(new GrAdeApp());
 }
@@ -68,11 +71,11 @@ class MainViewState extends State<MainView> {
   void _changePage(int index) {
     setState(() {
       if(index == 0) {
-        _page = new GradeAverage();
+        _page = gradeAverage;
         _currentIndex = 0;
 
       } else {
-        _page = new GPACalculator();
+        _page = gpaCalculator;
         _currentIndex = 1;
       }
     });

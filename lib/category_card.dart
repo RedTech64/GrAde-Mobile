@@ -30,18 +30,7 @@ class CategoryCard extends StatelessWidget {
           onPressed: () {
           },
           onDeleted: () {
-            print(userID);
-            final DocumentReference docRef = Firestore.instance.collection('users').document(userID);
-            Firestore.instance.runTransaction((transaction) async {
-              DocumentSnapshot freshSnap = await transaction.get(docRef);
-              var grades = freshSnap['average'][selectedAverage]['categories'][this._category.index]['grades'];
-              var newGrades = fixArray(grades);
-              newGrades.removeAt(i);
-              freshSnap['average'][selectedAverage]['categories'][this._category.index]['grades'] = newGrades;
-              await transaction.update(docRef, {
-                'average': freshSnap['average'],
-              });
-            });
+            gradeAverageState.deleteGrade(_category.index, i);
           },
         ),
       ));
@@ -61,16 +50,9 @@ class CategoryCard extends StatelessWidget {
     ));
     if(category != null) {
       if(category.delete) {
-        deleteCategory(new Category(category.name, category.weight, category.index));
+        gradeAverageState.deleteCategory(new Category(category.name, category.weight, category.index));
       } else {
-        Firestore.instance.runTransaction((transaction) async {
-          DocumentSnapshot freshSnap = await transaction.get(Firestore.instance.collection('users').document(userID));
-          freshSnap['average'][selectedAverage]['categories'][category.index]['name'] = category.name;
-          freshSnap['average'][selectedAverage]['categories'][category.index]['weight'] = category.weight;
-          await transaction.update(freshSnap.reference, {
-            'average': freshSnap['average'],
-          });
-        });
+        gradeAverageState.editCategory(new Category(category.name, category.weight, category.index));
       }
     }
   }
