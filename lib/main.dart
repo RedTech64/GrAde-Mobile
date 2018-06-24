@@ -7,6 +7,7 @@ import './utils/auth.dart';
 
 GradeAverage gradeAverage = new GradeAverage();
 GPACalculator gpaCalculator = new GPACalculator();
+bool average = true;
 
 void main() {
   runApp(new GrAdeApp());
@@ -47,6 +48,18 @@ class MainViewState extends State<MainView> {
         title: new Text('GrAde'),
         backgroundColor: Colors.red,
         actions: <Widget>[
+          average ? new IconButton(
+            icon: new Icon(Icons.edit),
+            onPressed: () {
+              openAverageEditDialog(context);
+            },
+          ) : new Container(),
+          average ? new IconButton(
+            icon: new Icon(Icons.subject),
+            onPressed: () {
+              openAverageDialog(context);
+            },
+          ) : new Container(),
           new IconButton(
             icon: new Icon(Icons.settings),
             onPressed: () {
@@ -73,10 +86,12 @@ class MainViewState extends State<MainView> {
       if(index == 0) {
         _page = gradeAverage;
         _currentIndex = 0;
+        average = true;
 
       } else {
         _page = gpaCalculator;
         _currentIndex = 1;
+        average = false;
       }
     });
   }

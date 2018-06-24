@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'category_dialoge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'category_card.dart';
+import 'average_dialog.dart';
 import 'utils/auth.dart';
 import 'loading.dart';
 import 'dart:async';
 
-int selectedAverage = 0;
 var average = [];
+bool averageLoaded = false;
 GradeAverageState gradeAverageState;
 
 class GradeAverage extends StatefulWidget {
@@ -21,6 +22,7 @@ class GradeAverage extends StatefulWidget {
 class GradeAverageState extends State<GradeAverage> {
   var _gradeValue = 100.0;
   var _weightValue = 100.0;
+  int _selectedAverage = 0;
   var _selectedCategory = 0;
   var categories = [];
   bool dataExists = false;
@@ -28,20 +30,69 @@ class GradeAverageState extends State<GradeAverage> {
   
   @override
   void initState() {
+    var data = false;
     signInWithGoogle().then((result) {
+      averageLoaded = false;
       _setupData().then((result) {
-        setState(() {
-          dataExists = result;
+          data = result;
+          Firestore.instance.collection('users').document(userID).get().then((doc) {
+            setState(() {
+              _selectedAverage = doc['averageSelected'];
+              dataExists = data;
+            });
+          });
         });
       });
-    });
     super.initState();
+  }
+
+  void addAverage(name) {
+    var newAverage = fixArray(average);
+    newAverage.add({
+      'name': name,
+      'categories': [{
+        'name': "Category 1", 
+        'weight': 100, 
+        'grades': []
+      }],
+      'selectedCategory': 0
+    });
+    average = newAverage;
+    Firestore.instance.collection('users').document(userID).updateData({'average': average});
+    setState(() {
+      quickUpdate = 2;
+      _selectedAverage = newAverage.length-1;
+    });
+  }
+
+  void updateAverage(name) {
+    var newAverage = fixArray(average);
+    newAverage[_selectedAverage]['name'] = name;
+    Firestore.instance.collection('users').document(userID).updateData({'average': newAverage});
+  }
+
+  void setAverage(int averageIndex) {
+    setState(() {
+      _selectedAverage = averageIndex;
+    });
+  }
+
+  void deleteAverage(int averageIndex) {
+    var newAverage = fixArray(average);
+    newAverage.removeAt(averageIndex);
+    Firestore.instance.collection('users').document(userID).updateData({'average': newAverage});
+    setState(() {
+      _selectedAverage = 0;
+    });
   }
 
   void addGrade() {
     setState(() {
       var grades = fixArray(categories[_selectedCategory]['grades']);
-      grades.add({'grade': _gradeValue.floor().toInt(), 'weight': _weightValue.floor().toInt()});
+      grades.add({
+        'grade': _gradeValue.floor().toInt(), 
+        'weight': _weightValue.floor().toInt()
+      });
       quickUpdate = 2;
       categories[_selectedCategory]['grades'] = grades;
     });
@@ -86,21 +137,13 @@ void deleteCategory(Category category) {
 }
 
   void _runTransaction() {
-    print("RUN TRANS");
     final DocumentReference docRef = Firestore.instance.collection('users').document(userID);
     var batch = Firestore.instance.batch();
-    average[selectedAverage]['categories'] = categories;
+    average[_selectedAverage]['categories'] = categories;
     batch.updateData(docRef, {
         'average': average,
     });
     batch.commit();
-    Firestore.instance.runTransaction((transaction) async {
-      DocumentSnapshot freshSnap = await transaction.get(docRef);
-      freshSnap['average'][selectedAverage]['categories'] = categories;
-      await transaction.update(docRef, {
-        'average': freshSnap['average'],
-      }); 
-    });
   }
 
   Future<bool> _setupData() async {
@@ -178,8 +221,11 @@ void deleteCategory(Category category) {
       stream: Firestore.instance.collection('users').document(userID).snapshots(),
       builder: (context, snapshot) {
         if(!snapshot.hasData) return new Loading();
-        average = snapshot.data['average'];
-        if(quickUpdate == 0) categories = fixArray(snapshot.data['average'][selectedAverage]['categories']);
+        averageLoaded = true;
+        if(quickUpdate == 0) {
+          average = snapshot.data['average'];
+          categories = fixArray(snapshot.data['average'][_selectedAverage]['categories']);
+        }
         if(quickUpdate != 0) quickUpdate--;
         if(quickUpdate == 1) _runTransaction();
         return new SingleChildScrollView(
@@ -193,8 +239,7 @@ void deleteCategory(Category category) {
                       children: <Widget>[
                         new Padding(
                           padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
-                          child: new Text(
-                            'Overall Grades',
+                          child: new Text(average[_selectedAverage]['name'],
                             style: new TextStyle(
                               fontSize: 24.0,
                             ),
@@ -345,6 +390,10 @@ void deleteCategory(Category category) {
     }
     return sum;
   }
+
+  int getSelectedAverage() {
+    return _selectedAverage;
+  }
 }
 
 class CategoryGrade extends StatelessWidget {
@@ -386,6 +435,45 @@ Future openCreateCategoryDialog(context) async {
   ));
   if(category != null) {
     gradeAverageState.addCategory(new Category(category.name, category.weight, -1));
+  }
+}
+
+Future openAverageDialog(context) async {
+  var result;
+  var addResult;
+  if(averageLoaded) {
+    result = await showDialog(
+      context: context,
+      builder: (BuildContext context) => new AverageDialog(average)
+    );
+    if(result == -1) {
+      addResult = await showDialog(
+        context: context,
+        builder: (BuildContext context) => new AverageEditDialog("New Average",true),
+      );
+      if(addResult != null) {
+        gradeAverageState.addAverage(addResult['name']);
+      }
+    } else if(result != null) {
+      gradeAverageState.setAverage(result);
+    }
+  }
+}
+
+Future openAverageEditDialog(context) async {
+  var result;
+  if(averageLoaded) {
+    result = await showDialog(
+      context: context,
+      builder: (BuildContext context) => new AverageEditDialog(average[gradeAverageState.getSelectedAverage()]['name'],false)
+    );
+    if(result != null) {
+      if(result['delete']) {
+        gradeAverageState.deleteAverage(gradeAverageState.getSelectedAverage());
+      } else {
+        gradeAverageState.updateAverage(result['name']);
+      }
+    }
   }
 }
 
