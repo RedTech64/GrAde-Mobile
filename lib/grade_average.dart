@@ -175,20 +175,11 @@ void deleteCategory(Category category) {
     }
   }
 
-  List<Widget> _buildCategoryGradeList(categories) {
-    var list = <Widget>[];
-    for(var i = 0; i < categories.length; i++) {
-      list.add(new CategoryGrade(categories[i]['name'], _getCategoryGrade(categories[i]['grades'])));
-    }
-    return list;
-  }
-
   List<Widget> _buildCategoryCards(categories) {
     var list = <Widget>[];
     for(var i = 0; i < categories.length; i++) {
       list.add(new CategoryCard(
-        new Category(categories[i]['name'],categories[i]['weight'], i),
-        categories[i]['grades']));
+        new Category(categories[i]['name'],categories[i]['weight'], i), categories[i]['grades']));
     }
     return list;
   }
@@ -263,7 +254,7 @@ void deleteCategory(Category category) {
                         new Padding(
                           padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
                           child: new Column(
-                            children: _buildCategoryGradeList(categories),
+                            children: categories.map((category) => new CategoryGrade(category['name'], _getCategoryGrade(category['grades']))).toList(),
                           ),
                         ),
                       ],

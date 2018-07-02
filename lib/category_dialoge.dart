@@ -51,7 +51,7 @@ class CategoryDialogState extends State<CategoryDialog> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Edit Category'),
+        title: edit ? new Text('Edit Category') : new Text('New Category'),
         actions: <Widget>[
           edit ? new IconButton(
             icon: new Icon(Icons.delete),
