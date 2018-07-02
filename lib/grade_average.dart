@@ -12,14 +12,19 @@ bool averageLoaded = false;
 GradeAverageState gradeAverageState;
 
 class GradeAverage extends StatefulWidget {
+  final String _userID;
+
+  GradeAverage(Key key,this._userID) : super(key: key);
+  
   @override
   State createState() {
-    gradeAverageState = new GradeAverageState();
+    gradeAverageState = new GradeAverageState(_userID);
     return gradeAverageState;
   }
 }
 
 class GradeAverageState extends State<GradeAverage> {
+  String _userID;
   var _gradeValue = 100.0;
   var _weightValue = 100.0;
   int _selectedAverage = 0;
@@ -27,22 +32,21 @@ class GradeAverageState extends State<GradeAverage> {
   var categories = [];
   bool dataExists = false;
   int quickUpdate = 0;
+
+  GradeAverageState(this._userID);
   
   @override
   void initState() {
     var data = false;
-    signInWithGoogle().then((result) {
-      averageLoaded = false;
-      _setupData().then((result) {
-          data = result;
-          Firestore.instance.collection('users').document(userID).get().then((doc) {
-            setState(() {
-              _selectedAverage = doc['averageSelected'];
-              dataExists = data;
-            });
-          });
+    _setupData().then((result) {
+      data = result;
+      Firestore.instance.collection('users').document(_userID).get().then((doc) {
+        setState(() {
+          _selectedAverage = doc['averageSelected'];
+          dataExists = data;
         });
       });
+    });
     super.initState();
   }
 
@@ -58,7 +62,7 @@ class GradeAverageState extends State<GradeAverage> {
       'selectedCategory': 0
     });
     average = newAverage;
-    Firestore.instance.collection('users').document(userID).updateData({'average': average});
+    Firestore.instance.collection('users').document(_userID).updateData({'average': average});
     setState(() {
       quickUpdate = 2;
       _selectedAverage = newAverage.length-1;
@@ -68,7 +72,7 @@ class GradeAverageState extends State<GradeAverage> {
   void updateAverage(name) {
     var newAverage = fixArray(average);
     newAverage[_selectedAverage]['name'] = name;
-    Firestore.instance.collection('users').document(userID).updateData({'average': newAverage});
+    Firestore.instance.collection('users').document(_userID).updateData({'average': newAverage});
   }
 
   void setAverage(int averageIndex) {
@@ -80,7 +84,7 @@ class GradeAverageState extends State<GradeAverage> {
   void deleteAverage(int averageIndex) {
     var newAverage = fixArray(average);
     newAverage.removeAt(averageIndex);
-    Firestore.instance.collection('users').document(userID).updateData({'average': newAverage});
+    Firestore.instance.collection('users').document(_userID).updateData({'average': newAverage});
     setState(() {
       _selectedAverage = 0;
     });
@@ -137,7 +141,7 @@ void deleteCategory(Category category) {
 }
 
   void _runTransaction() {
-    final DocumentReference docRef = Firestore.instance.collection('users').document(userID);
+    final DocumentReference docRef = Firestore.instance.collection('users').document(_userID);
     var batch = Firestore.instance.batch();
     average[_selectedAverage]['categories'] = categories;
     batch.updateData(docRef, {
@@ -147,7 +151,7 @@ void deleteCategory(Category category) {
   }
 
   Future<bool> _setupData() async {
-    DocumentReference docRef = Firestore.instance.collection('users').document(userID);
+    DocumentReference docRef = Firestore.instance.collection('users').document(_userID);
     DocumentSnapshot data = await docRef.get();
     if(!data.exists || data['average'] == null) {
       await docRef.setData({
@@ -216,9 +220,9 @@ void deleteCategory(Category category) {
 
   @override
   Widget build(BuildContext context) {
-    if(userID == null || dataExists == false) return new Loading();
+    if(_userID == null) return new Loading();
     return new StreamBuilder(
-      stream: Firestore.instance.collection('users').document(userID).snapshots(),
+      stream: Firestore.instance.collection('users').document(_userID).snapshots(),
       builder: (context, snapshot) {
         if(!snapshot.hasData) return new Loading();
         averageLoaded = true;

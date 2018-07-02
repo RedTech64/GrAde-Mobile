@@ -4,9 +4,10 @@ import './grade_average.dart';
 import './gpa_calculator.dart';
 import './settings.dart';
 import './utils/auth.dart';
+import 'loading.dart';
+import 'dart:async';
 
-GradeAverage gradeAverage = new GradeAverage();
-GPACalculator gpaCalculator = new GPACalculator();
+double version = 0.5;
 bool average = true;
 
 void main() {
@@ -33,12 +34,19 @@ class MainView extends StatefulWidget {
 
 
 class MainViewState extends State<MainView> {
-  Widget _page = new GradeAverage();
+  GradeAverage gradeAverage;
+  GPACalculator gpaCalculator;
+  Widget _page = new Loading();
   int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    signInWithGoogle(false).then((result) {
+      gradeAverage =  new GradeAverage(new Key(userID), userID);
+      gpaCalculator = new GPACalculator();
+      _changePage(0);
+    });
   }
 
   @override
@@ -63,7 +71,7 @@ class MainViewState extends State<MainView> {
           new IconButton(
             icon: new Icon(Icons.settings),
             onPressed: () {
-              Navigator.of(context).pushNamed('/settings');
+              openSettings();
             }),
         ],
       ),
@@ -81,15 +89,33 @@ class MainViewState extends State<MainView> {
     );
   }
 
+  void openSettings() async {
+    await Navigator.of(context).pushNamed('/settings');
+    _updateUser();
+  }
+
   void _changePage(int index) {
     setState(() {
       if(index == 0) {
         _page = gradeAverage;
         _currentIndex = 0;
         average = true;
-
       } else {
         _page = gpaCalculator;
+        _currentIndex = 1;
+        average = false;
+      }
+    });
+  }
+
+  void _updateUser() {
+    setState(() {
+      if(_currentIndex == 0) {
+        _page = new GradeAverage(new Key(userID),userID);
+        _currentIndex = 0;
+        average = true;
+      } else {
+        _page = new GPACalculator();
         _currentIndex = 1;
         average = false;
       }
