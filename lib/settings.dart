@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import './utils/auth.dart';
+import 'settings_option.dart';
+import 'main.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -7,6 +9,7 @@ class Settings extends StatefulWidget {
 }
 
 class SettingsState extends State<Settings> {
+
   @override
   void initState() {
     super.initState();
@@ -20,15 +23,52 @@ class SettingsState extends State<Settings> {
         backgroundColor: Colors.red,
       ),
       body: new Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(0.0),
         child: new Center(
           child: new Column(
             children: <Widget>[
-              new RaisedButton(
-                child: new Text('Log In'),
+              new SettingsOption(
+                mainLine: 'Switch Accounts',
                 onPressed: () {
-                  signInWithGoogle();
-                }
+                  switchAccounts();
+                },
+              ),
+              new Divider(
+                height: 0.0,
+              ),
+              new SettingsOption(
+                mainLine: 'About',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return new AlertDialog(
+                        title: new Text('About'),
+                          content: new SingleChildScrollView(
+                            child: new Column(
+                              children: <Widget>[
+                                new Text('Version: '+version.toString()),
+                                new Text('Published by RedTech Software'),
+                                new Text('Developed by Cole Weinman'),
+                                new Text('Email bugs, feedback and suggestions to grade@redtech.software'),
+                              ],
+                            ),
+                        ),
+                        actions: <Widget>[
+                          new FlatButton(
+                            child: new Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      );
+                    }
+                  );
+                },
+              ),
+              new Divider(
+                height: 0.0,
               ),
             ],
           ),
