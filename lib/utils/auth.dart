@@ -7,6 +7,17 @@ String userID;
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
+Future<bool> signInWithGoogle(bool force) async {
+  GoogleSignInAccount googleUser;
+  if(force) {
+    googleUser = await _googleSignIn.signIn();
+  } else {
+    googleUser = await _googleSignIn.signInSilently();
+    if(googleUser == null) {
+      googleUser = await _googleSignIn.signIn();
+    }
+  }
+
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
   user = await _auth.signInWithGoogle(
     accessToken: googleAuth.accessToken,
