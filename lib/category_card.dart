@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'grade_average.dart';
 import 'category_dialoge.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'utils/auth.dart';
 import 'dart:async';
+import 'thin_divider.dart';
 
 class CategoryCard extends StatelessWidget {
   final Category _category;
@@ -23,7 +22,7 @@ class CategoryCard extends StatelessWidget {
         _text = _grade.toString();
       }
       list.add(new Padding(
-        padding: const EdgeInsets.fromLTRB(2.0, 4.0, 2.0, 0.0),
+        padding: const EdgeInsets.symmetric(horizontal: 2.0),
         child: new InputChip(
           label: new Text(_text),
           deleteIcon: new Icon(Icons.cancel),
@@ -60,50 +59,46 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Card(
-      child: new Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: new Column(
-          children: <Widget>[
-            new Row(
-              children: <Widget>[
-                new Expanded(
-                  child: new Stack(
-                    fit: StackFit.passthrough,
-                    children: <Widget>[
-                      new Positioned(
-                        child: new Text(
-                          this._category.name,
-                          textAlign: TextAlign.center,
-                          style: new TextStyle(
-                            fontSize: 24.0,
-                          ),
-                        ),
-                      ),
-                      new Positioned(
-                        right: 8.0,
-                        top: 0.0,
-                        bottom: 2.0,
-                        child: new IconButton(
-                          icon: new Icon(Icons.edit),
-                          onPressed: () {
-                            _openEditCategoryDialog(context);
-                          },
-                        ),
-                      ),
-                    ],
+      child: new Column(
+        children: <Widget>[
+          new Row(
+            children: <Widget>[
+              new Padding(
+                padding: EdgeInsets.all(8.0),
+                child: new SizedBox(
+                  height: 32.0,
+                  width: 32.0,
+                  child: new SizedBox(
+                    height: 24.0,
+                    width: 24.0,
                   ),
                 ),
-              ],
-            ),
-            new Divider(),
-            new Padding(
-              padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
-              child: new Wrap(
-                children: _buildChips(_grades),
               ),
-            )
-          ],
-        ),
+              new Expanded(
+                child: new Text(
+                  _category.name,
+                  textAlign: TextAlign.center,
+                  style: new TextStyle(
+                    fontSize: 24.0,
+                  ),
+                ),
+              ),
+              new IconButton(
+                  icon: new Icon(Icons.edit),
+                  onPressed: () {
+                    _openEditCategoryDialog(context);
+                  },
+              )
+            ],
+          ),
+          new ThinDivider(),
+          new Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new Wrap(
+              children: _buildChips(_grades),
+            ),
+          )
+        ],
       ),
     );
   }
