@@ -6,6 +6,7 @@ import 'average_dialog.dart';
 import 'utils/auth.dart';
 import 'loading.dart';
 import 'dart:async';
+import 'thin_divider.dart';
 
 var average = [];
 bool averageLoaded = false;
@@ -233,16 +234,16 @@ void deleteCategory(Category category) {
                     child: new Column(
                       children: <Widget>[
                         new Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: new Text(average[_selectedAverage]['name'],
                             style: new TextStyle(
                               fontSize: 24.0,
                             ),
                           ),
                         ),
-                        new Divider(),
+                        new ThinDivider(),
                         new Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: new Text(
                             '${_getOverallGrade(categories).toStringAsFixed(2)}%',
                             style: new TextStyle(
@@ -250,9 +251,9 @@ void deleteCategory(Category category) {
                             ),
                           ),
                         ),
-                        new Divider(),
+                        new ThinDivider(),
                         new Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 8.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: new Column(
                             children: categories.map((category) => new CategoryGrade(category['name'], _getCategoryGrade(category['grades']))).toList(),
                           ),
@@ -264,7 +265,7 @@ void deleteCategory(Category category) {
                     child: new Column(
                       children: <Widget>[
                         new Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: new Text(
                             'Add Grades',
                             style: new TextStyle(
@@ -272,9 +273,9 @@ void deleteCategory(Category category) {
                             ),
                           ),
                         ),
-                        new Divider(),
+                        new ThinDivider(),
                         new Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: new Text(
                             _getGradeDisplay(),
                             style: new TextStyle(
@@ -305,7 +306,7 @@ void deleteCategory(Category category) {
                           ),
                         ),
                         new Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: new Row(
                             children: <Widget>[
                               new Text(
@@ -326,13 +327,16 @@ void deleteCategory(Category category) {
                             ],
                           ),
                         ),
-                        new Divider(),
-                        new Wrap(
-                          children: _buildCategoryChips(categories),
-                        ),
-                        new Divider(),
+                        new ThinDivider(),
                         new Padding(
-                          padding: const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 16.0),
+                          padding: const EdgeInsets.all(8.0),
+                          child: new Wrap(
+                            children: _buildCategoryChips(categories),
+                          ),
+                        ),
+                        new ThinDivider(),
+                        new Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: new RaisedButton(
                             child: new Text('ADD'),
                             onPressed: () {
