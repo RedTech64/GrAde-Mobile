@@ -37,12 +37,14 @@ class MainViewState extends State<MainView> {
   GradeAverage gradeAverage;
   GPACalculator gpaCalculator;
   Widget _page = new Loading();
+  Widget _fab = GradeAverageFAB();
   int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
     signInWithGoogle(false).then((result) {
+      initFCM();
       gradeAverage =  new GradeAverage(new Key(userID), userID);
       gpaCalculator = new GPACalculator();
       _changePage(0);
@@ -85,7 +87,7 @@ class MainViewState extends State<MainView> {
         currentIndex: _currentIndex,
         onTap: _changePage,
       ),
-      floatingActionButton: new GradeAverageFAB(),
+      floatingActionButton: _fab,
     );
   }
 
@@ -98,10 +100,12 @@ class MainViewState extends State<MainView> {
     setState(() {
       if(index == 0) {
         _page = gradeAverage;
+        _fab = new GradeAverageFAB();
         _currentIndex = 0;
         average = true;
       } else {
         _page = gpaCalculator;
+        _fab = new GPACalculatorFAB();
         _currentIndex = 1;
         average = false;
       }
