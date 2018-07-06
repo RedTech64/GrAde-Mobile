@@ -13,6 +13,7 @@ class GPACalculator extends StatefulWidget {
 class GPACalculatorState extends State<GPACalculator> {
   int _decimalPlaces = 3;
   var _classes = [];
+  bool _empty;
 
   @override
   void initState() {
@@ -25,7 +26,8 @@ class GPACalculatorState extends State<GPACalculator> {
       stream: Firestore.instance.collection('users').document(userID).snapshots(),
       builder: (context,snapshot) {
         if(!snapshot.hasData) return new Loading();
-        _classes = snapshot.data['classes']; 
+        _classes = snapshot.data['classes'];
+        _empty = _classes.isEmpty;
         return new SingleChildScrollView(
           child: new Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
@@ -47,7 +49,7 @@ class GPACalculatorState extends State<GPACalculator> {
                         new ThinDivider(),
                         new Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: GestureDetector(
+                          child: new GestureDetector(
                             child: new Text(
                               '${_getGPA().toStringAsFixed(_decimalPlaces)}%',
                               style: new TextStyle(
@@ -82,7 +84,14 @@ class GPACalculatorState extends State<GPACalculator> {
                         ),
                         new ThinDivider(),
                         new Column(
-                          children: _classes.map((c) => new Class(c['name'],c['grade'],c['qp'])).toList(),
+                          children:
+                          _empty ? _classes.map((c) => new Class(c['name'],c['grade'],c['qp'])).toList() :
+                          [
+                            new Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('No Classes Added'),
+                            )
+                          ],
                         ),
                       ],
                     ),
