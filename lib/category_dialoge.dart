@@ -18,13 +18,13 @@ class CategoryDialogData {
 }
 
 class CategoryDialog extends StatefulWidget {
-  final Category category;
-  final bool edit;
+  final Category _category;
+  final bool _edit;
 
-  CategoryDialog(this.category,this.edit);
+  CategoryDialog(this._category,this._edit);
   
   State createState() {
-    return new CategoryDialogState(this.category,this.edit);
+    return new CategoryDialogState(this._category,this._edit);
   }
 }
 
@@ -34,7 +34,7 @@ class CategoryDialogState extends State<CategoryDialog> {
   double _weight;
   int _index;
   bool edit;
-  var _controler;
+  var _controller;
 
   CategoryDialogState(Category category,this.edit) {
     this._name = category.name;
@@ -45,7 +45,7 @@ class CategoryDialogState extends State<CategoryDialog> {
   @override
   void initState() {
     super.initState();
-    _controler = new TextEditingController(text: _name);
+    _controller = new TextEditingController(text: _name);
   }
   
   Widget build(BuildContext context) {
@@ -79,7 +79,7 @@ class CategoryDialogState extends State<CategoryDialog> {
               new ListTile(
                 leading: new Icon(Icons.speaker_notes, color: Colors.grey[500]),
                 title: new TextField(
-                  controller: _controler,
+                  controller: _controller,
                   decoration: new InputDecoration(
                     hintText: 'Category Name',
                   ),
