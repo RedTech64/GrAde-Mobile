@@ -3,7 +3,7 @@ import 'category_dialoge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'category_card.dart';
 import 'average_dialog.dart';
-import 'utils/auth.dart';
+import 'main.dart';
 import 'loading.dart';
 import 'dart:async';
 import 'thin_divider.dart';
@@ -474,12 +474,4 @@ Future openAverageEditDialog(context) async {
       }
     }
   }
-}
-
-List<dynamic> fixArray(array) {
-  var list = [];
-  for(var i = 0; i < array.length; i++) {
-   list.add(array[i]);
-  }
-  return list;
 }

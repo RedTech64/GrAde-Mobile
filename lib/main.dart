@@ -126,3 +126,11 @@ class MainViewState extends State<MainView> {
     });
   }
 }
+
+List<dynamic> fixArray(array) {
+  var list = [];
+  for(var i = 0; i < array.length; i++) {
+    list.add(array[i]);
+  }
+  return list;
+}
