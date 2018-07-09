@@ -1,33 +1,107 @@
 import 'package:flutter/material.dart';
-import 'utils/auth.dart';
+import 'main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'loading.dart';
 import 'thin_divider.dart';
 import 'class.dart';
- 
+import 'class_dialog.dart';
+import 'dart:async';
+
+GPACalculatorState gpaCalculatorState;
+
 class GPACalculator extends StatefulWidget {
+  final String _userID;
+
+  GPACalculator(Key key,this._userID) : super(key: key);
+
   @override
-  State createState() => new GPACalculatorState();
+  State createState() {
+    gpaCalculatorState = new GPACalculatorState(_userID);
+    return gpaCalculatorState;
+  }
 }
  
 class GPACalculatorState extends State<GPACalculator> {
   int _decimalPlaces = 3;
   var _classes = [];
   bool _empty;
+  String _userID;
+  int _quickUpdate = 0;
+
+  GPACalculatorState(this._userID);
 
   @override
   void initState() {
     super.initState();
   }
- 
+
+  void addClass(name,grade,qp) {
+    var newClasses = fixArray(_classes);
+    newClasses.add({
+      'name': name,
+      'grade': grade,
+      'qp': qp,
+    });
+    Firestore.instance.collection('users').document(_userID).updateData({'classes': newClasses});
+    setState(() {
+      _classes = newClasses;
+      _quickUpdate = 2;
+    });
+  }
+
+  void editClass(index,name,grade,qp) {
+    var newClasses = fixArray(_classes);
+    newClasses[index] = {
+      'name': name,
+      'grade': grade,
+      'qp': qp,
+    };
+    Firestore.instance.collection('users').document(_userID).updateData({'classes': newClasses});
+    setState(() {
+      _classes = newClasses;
+      _quickUpdate = 2;
+    });
+  }
+
+  void deleteClass(index) {
+    var newClasses = fixArray(_classes);
+    newClasses.removeAt(index);
+    Firestore.instance.collection('users').document(_userID).updateData({'classes': newClasses});
+    setState(() {
+      _classes = newClasses;
+      _quickUpdate = 2;
+    });
+  }
+
+  List<Widget> _buildClasses(classes) {
+    var list = <Widget>[];
+    for(var i = 0; i < classes.length; i++) {
+      var name = classes[i]['name'];
+      var grade = classes[i]['grade'];
+      var qp = classes[i]['qp'];
+      if(grade == null) {
+        grade = 0;
+      }
+      if(qp == null) {
+        qp = 0;
+      }
+      print(name);
+      print(grade);
+      print(qp);
+      list.add(new Class(i,name,grade,qp));
+    }
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
     return new StreamBuilder(
-      stream: Firestore.instance.collection('users').document(userID).snapshots(),
+      stream: Firestore.instance.collection('users').document(_userID).snapshots(),
       builder: (context,snapshot) {
         if(!snapshot.hasData) return new Loading();
         _classes = snapshot.data['classes'];
         _empty = _classes.isEmpty;
+        print(_classes);
         return new SingleChildScrollView(
           child: new Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
@@ -85,13 +159,13 @@ class GPACalculatorState extends State<GPACalculator> {
                         new ThinDivider(),
                         new Column(
                           children:
-                          _empty ? _classes.map((c) => new Class(c['name'],c['grade'],c['qp'])).toList() :
+                          _empty ?
                           [
                             new Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Text('No Classes Added'),
                             )
-                          ],
+                          ] : _buildClasses(_classes)
                         ),
                       ],
                     ),
@@ -117,8 +191,21 @@ class GPACalculatorFAB extends StatelessWidget {
       label: new Text('Add Class'),
       icon: new Icon(Icons.add_box),
       onPressed: () {
-        //TODO: add dialog
+        openCreateClassDialog(context);
       },
     );
+  }
+}
+
+Future openCreateClassDialog(context) async {
+  ClassDialogData c = await Navigator.of(context).push(new MaterialPageRoute<ClassDialogData>(
+      builder: (BuildContext context) {
+        return new ClassDialog("",100,0,false);
+      },
+      fullscreenDialog: true
+  ));
+  print(c.name);
+  if(c != null) {
+    gpaCalculatorState.addClass(c.name, c.grade,c.qp);
   }
 }

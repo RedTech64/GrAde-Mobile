@@ -46,7 +46,7 @@ class MainViewState extends State<MainView> {
     signInWithGoogle(false).then((result) {
       initFCM();
       gradeAverage =  new GradeAverage(new Key(userID), userID);
-      gpaCalculator = new GPACalculator();
+      gpaCalculator = new GPACalculator(new Key(userID), userID);
       _changePage(0);
     });
   }
@@ -119,7 +119,7 @@ class MainViewState extends State<MainView> {
         _currentIndex = 0;
         average = true;
       } else {
-        _page = new GPACalculator();
+        _page = new GPACalculator(new Key(userID), userID);
         _currentIndex = 1;
         average = false;
       }
