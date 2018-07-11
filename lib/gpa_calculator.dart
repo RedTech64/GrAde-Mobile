@@ -33,6 +33,22 @@ class GPACalculatorState extends State<GPACalculator> {
   @override
   void initState() {
     super.initState();
+    Firestore.instance.collection('users').document(_userID).get().then((doc) {
+      _setupData();
+    });
+  }
+
+  Future<bool> _setupData() async {
+    DocumentReference docRef = Firestore.instance.collection('users').document(_userID);
+    DocumentSnapshot data = await docRef.get();
+    if(!data.exists || data['classes'] == null) {
+      await docRef.setData({
+        'classes': []
+      });
+      return true;
+    } else {
+      return true;
+    }
   }
 
   void addClass(name,grade,qp) {
@@ -85,9 +101,6 @@ class GPACalculatorState extends State<GPACalculator> {
       if(qp == null) {
         qp = 0;
       }
-      print(name);
-      print(grade);
-      print(qp);
       list.add(new Class(i,name,grade,qp));
     }
     return list;
@@ -101,7 +114,6 @@ class GPACalculatorState extends State<GPACalculator> {
         if(!snapshot.hasData) return new Loading();
         _classes = snapshot.data['classes'];
         _empty = _classes.isEmpty;
-        print(_classes);
         return new SingleChildScrollView(
           child: new Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
@@ -180,7 +192,20 @@ class GPACalculatorState extends State<GPACalculator> {
   }
  
   double _getGPA() {
-    return 100.0;
+    double sum = 0.0;
+    for(var i = 0; i < _classes.length; i++) {
+      var c = _classes[i];
+      if(c['grade']+c['qp'] > 100+c['qp']) {
+        sum += 100+c['qp'];
+      } else {
+        sum += c['grade']+c['qp'];
+      }
+    }
+    if(_classes.length == 0) {
+      return 0.0;
+    } else {
+      return sum/_classes.length;
+    }
   }
 }
 
@@ -204,7 +229,6 @@ Future openCreateClassDialog(context) async {
       },
       fullscreenDialog: true
   ));
-  print(c.name);
   if(c != null) {
     gpaCalculatorState.addClass(c.name, c.grade,c.qp);
   }
