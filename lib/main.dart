@@ -61,13 +61,13 @@ class MainViewState extends State<MainView> {
           average ? new IconButton(
             icon: new Icon(Icons.edit),
             onPressed: () {
-              openAverageEditDialog(context);
+              gradeAverageState.openAverageEditDialog(context);
             },
           ) : new Container(),
           average ? new IconButton(
             icon: new Icon(Icons.subject),
             onPressed: () {
-              openAverageDialog(context);
+              gradeAverageState.openAverageDialog(context);
             },
           ) : new Container(),
           new IconButton(

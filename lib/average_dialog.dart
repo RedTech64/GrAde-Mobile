@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class AverageDialog extends StatelessWidget {
   final averages;
+  final bool add;
 
-  AverageDialog(this.averages);
+  AverageDialog(this.averages,this.add);
 
   List<Widget> _buildAverageElements(context) {
     var list = <Widget>[];
@@ -20,7 +21,7 @@ class AverageDialog extends StatelessWidget {
           ],
         ),
         onPressed: () {
-          Navigator.pop(context, i);
+          Navigator.pop(context, averages[i]['id']);
         },
       ));
     }
@@ -40,8 +41,8 @@ class AverageDialog extends StatelessWidget {
             ),
           ],
         ),
-        new Divider(),
-        new SimpleDialogOption(
+        add ? new Divider() : new Container(),
+        add ? new SimpleDialogOption(
           child: new Row(
             children: <Widget>[
               new Icon(Icons.add),
@@ -56,7 +57,7 @@ class AverageDialog extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context, -1);
           },
-        )
+        ) : new Container(),
       ]
     ); 
   }
