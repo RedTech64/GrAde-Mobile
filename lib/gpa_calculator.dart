@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'loading.dart';
 import 'thin_divider.dart';
@@ -23,10 +22,9 @@ class GPACalculator extends StatefulWidget {
  
 class GPACalculatorState extends State<GPACalculator> {
   int _decimalPlaces = 3;
-  var _classes = [];
   bool _empty;
   String _userID;
-  int _quickUpdate = 0;
+  DocumentReference userData;
 
   GPACalculatorState(this._userID);
 
@@ -34,7 +32,9 @@ class GPACalculatorState extends State<GPACalculator> {
   void initState() {
     super.initState();
     Firestore.instance.collection('users').document(_userID).get().then((doc) {
-      _setupData();
+      _setupData().then((result) {
+        userData = Firestore.instance.collection('users').document(_userID);
+      });
     });
   }
 
@@ -43,7 +43,7 @@ class GPACalculatorState extends State<GPACalculator> {
     DocumentSnapshot data = await docRef.get();
     if(!data.exists || data['classes'] == null) {
       await docRef.setData({
-        'classes': []
+        'classes': true,
       });
       return true;
     } else {
@@ -51,57 +51,51 @@ class GPACalculatorState extends State<GPACalculator> {
     }
   }
 
-  void addClass(name,grade,qp) {
-    var newClasses = fixArray(_classes);
-    newClasses.add({
+  void addClass(name,grade,qp) async {
+    DocumentReference classDoc = await userData.collection('classes').add({
       'name': name,
       'grade': grade,
       'qp': qp,
     });
-    Firestore.instance.collection('users').document(_userID).updateData({'classes': newClasses});
-    setState(() {
-      _classes = newClasses;
-      _quickUpdate = 2;
+    var id = classDoc.documentID;
+    await classDoc.updateData({
+      'id': id,
     });
   }
 
-  void editClass(index,name,grade,qp) {
-    var newClasses = fixArray(_classes);
-    newClasses[index] = {
+  void editClass(id,name,grade,qp) async {
+    await userData.collection('classes').document(id).updateData({
       'name': name,
       'grade': grade,
       'qp': qp,
-    };
-    Firestore.instance.collection('users').document(_userID).updateData({'classes': newClasses});
-    setState(() {
-      _classes = newClasses;
-      _quickUpdate = 2;
     });
   }
 
-  void deleteClass(index) {
-    var newClasses = fixArray(_classes);
-    newClasses.removeAt(index);
-    Firestore.instance.collection('users').document(_userID).updateData({'classes': newClasses});
-    setState(() {
-      _classes = newClasses;
-      _quickUpdate = 2;
+  void deleteClass(id) async {
+    await userData.collection('classes').document(id).delete();
+  }
+
+  void link(String classID,String averageID) async {
+    var doc = Firestore.instance.collection('user').document(_userID).collection('classes').document(classID);
+    doc.updateData({
+      'link': averageID,
     });
   }
 
   List<Widget> _buildClasses(classes) {
     var list = <Widget>[];
     for(var i = 0; i < classes.length; i++) {
-      var name = classes[i]['name'];
-      var grade = classes[i]['grade'];
-      var qp = classes[i]['qp'];
+      var id = classes[i].data['id'];
+      var name = classes[i].data['name'];
+      var grade = classes[i].data['grade'];
+      var qp = classes[i].data['qp'];
       if(grade == null) {
         grade = 0;
       }
       if(qp == null) {
         qp = 0;
       }
-      list.add(new Class(i,name,grade,qp));
+      list.add(new Class(id,name,grade,qp));
     }
     return list;
   }
@@ -109,11 +103,14 @@ class GPACalculatorState extends State<GPACalculator> {
   @override
   Widget build(BuildContext context) {
     return new StreamBuilder(
-      stream: Firestore.instance.collection('users').document(_userID).snapshots(),
+      stream: Firestore.instance.collection('users').document(_userID).collection('classes').snapshots(),
       builder: (context,snapshot) {
         if(!snapshot.hasData) return new Loading();
-        _classes = snapshot.data['classes'];
-        _empty = _classes.isEmpty;
+        if(snapshot.data.documents.length == 0) {
+          _empty = true;
+        } else {
+          _empty = false;
+        }
         return new SingleChildScrollView(
           child: new Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
@@ -137,7 +134,7 @@ class GPACalculatorState extends State<GPACalculator> {
                           padding: const EdgeInsets.all(8.0),
                           child: new GestureDetector(
                             child: new Text(
-                              '${_getGPA().toStringAsFixed(_decimalPlaces)}%',
+                              '${_getGPA(snapshot.data.documents).toStringAsFixed(_decimalPlaces)}%',
                               style: new TextStyle(
                                 fontSize: 34.0,
                               ),
@@ -177,7 +174,7 @@ class GPACalculatorState extends State<GPACalculator> {
                               padding: EdgeInsets.all(8.0),
                               child: Text('No Classes Added'),
                             )
-                          ] : _buildClasses(_classes)
+                          ] : _buildClasses(snapshot.data.documents)
                         ),
                       ],
                     ),
@@ -190,21 +187,26 @@ class GPACalculatorState extends State<GPACalculator> {
       },
     );
   }
+
+  Future<List> getAverages() async {
+    DocumentSnapshot doc = await Firestore.instance.collection('users').document(_userID).get();
+    return doc.data['average'];
+  }
  
-  double _getGPA() {
+  double _getGPA(classes) {
     double sum = 0.0;
-    for(var i = 0; i < _classes.length; i++) {
-      var c = _classes[i];
-      if(c['grade']+c['qp'] > 100+c['qp']) {
-        sum += 100+c['qp'];
+    for(var i = 0; i < classes.length; i++) {
+      var c = classes[i].data;
+      if (c['grade'] + c['qp'] > 100 + c['qp']) {
+        sum += 100 + c['qp'];
       } else {
-        sum += c['grade']+c['qp'];
+        sum += c['grade'] + c['qp'];
       }
     }
-    if(_classes.length == 0) {
+    if(classes.length == 0) {
       return 0.0;
     } else {
-      return sum/_classes.length;
+      return sum/classes.length;
     }
   }
 }
@@ -223,9 +225,10 @@ class GPACalculatorFAB extends StatelessWidget {
 }
 
 Future openCreateClassDialog(context) async {
+  List averages = await gpaCalculatorState.getAverages();
   ClassDialogData c = await Navigator.of(context).push(new MaterialPageRoute<ClassDialogData>(
       builder: (BuildContext context) {
-        return new ClassDialog("",100,0,false);
+        return new ClassDialog("",100,0,false,false,averages);
       },
       fullscreenDialog: true
   ));

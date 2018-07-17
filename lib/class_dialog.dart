@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'average_dialog.dart';
 
 class ClassDialogData {
   String name;
   int grade;
   int qp;
+  String linked;
   bool delete;
 
-  ClassDialogData(this.name,this.grade,this.qp,this.delete);
+  ClassDialogData(this.name,this.grade,this.qp,this.linked,this.delete);
 }
 
 class ClassDialog extends StatefulWidget {
@@ -14,10 +17,12 @@ class ClassDialog extends StatefulWidget {
   final int grade;
   final int qp;
   final bool edit;
+  final bool linked;
+  final List averages;
 
-  ClassDialog(this.name,this.grade,this.qp,this.edit);
+  ClassDialog(this.name,this.grade,this.qp,this.edit,this.linked,this.averages);
 
-  State createState() => new ClassDialogState(name,grade.toDouble(),qp,edit);
+  State createState() => new ClassDialogState(name,grade.toDouble(),qp,edit,linked,averages);
 }
 
 class ClassDialogState extends State<ClassDialog> {
@@ -25,9 +30,11 @@ class ClassDialogState extends State<ClassDialog> {
   double _grade;
   int _qp;
   bool _edit;
+  bool _linked;
   var _controller;
+  List _averages;
 
-  ClassDialogState(this._name,this._grade,this._qp,this._edit);
+  ClassDialogState(this._name,this._grade,this._qp,this._edit,this._linked,this._averages);
 
   @override
   void initState() {
@@ -45,7 +52,7 @@ class ClassDialogState extends State<ClassDialog> {
             icon: new Icon(Icons.delete),
             onPressed: () {
               Navigator.of(context).pop(
-                new ClassDialogData(_name,_grade.floor().toInt(),_qp.toInt(),true),
+                new ClassDialogData(_name,_grade.floor().toInt(),_qp.toInt(),"",true),
               );
             },
           ) : new Container(),
@@ -53,7 +60,7 @@ class ClassDialogState extends State<ClassDialog> {
             icon: new Icon(Icons.save),
             onPressed: () {
               Navigator.of(context).pop(
-                new ClassDialogData(_name,_grade.floor().toInt(),_qp.toInt(),false),
+                new ClassDialogData(_name,_grade.floor().toInt(),_qp.toInt(),"",false),
               );
             },
           ),
@@ -101,6 +108,10 @@ class ClassDialogState extends State<ClassDialog> {
                   });
                 },
               ),
+              new FlatButton(
+                child: new Text('LINK TO AVERAGE'),
+                onPressed: () => _openLinkDialog(context),
+              ),
               new Divider(),
               new Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -132,5 +143,18 @@ class ClassDialogState extends State<ClassDialog> {
         ),
       ),
     );
+  }
+
+  Future _openLinkDialog(context) async {
+    var result;
+    result = await showDialog(
+        context: context,
+        builder: (BuildContext context) => new AverageDialog(_averages,false)
+    );
+    if(result != null) {
+      setState(() {
+
+      });
+    }
   }
 }

@@ -5,12 +5,12 @@ import 'class_dialog.dart';
 import 'gpa_calculator.dart';
 
 class Class extends StatelessWidget {
-  final _index;
-  final _name;
-  final _grade;
-  final _qp;
+  final String _id;
+  final String _name;
+  final int _grade;
+  final int _qp;
 
-  Class(this._index,this._name,this._grade,this._qp);
+  Class(this._id,this._name,this._grade,this._qp);
 
   @override
   Widget build(BuildContext context) {
@@ -65,17 +65,18 @@ class Class extends StatelessWidget {
   }
 
   Future _openEditClassDialog(context) async {
+    List averages = await gpaCalculatorState.getAverages();
     ClassDialogData c = await Navigator.of(context).push(new MaterialPageRoute<ClassDialogData>(
         builder: (BuildContext context) {
-          return new ClassDialog(_name,_grade,_qp,true);
+          return new ClassDialog(_name,_grade,_qp,true,false,averages);
         },
         fullscreenDialog: true
     ));
     if(c != null) {
       if(c.delete) {
-        gpaCalculatorState.deleteClass(_index);
+        gpaCalculatorState.deleteClass(_id);
       } else {
-        gpaCalculatorState.editClass(_index,_name,_grade,_qp);
+        gpaCalculatorState.editClass(_id,c.name,c.grade,c.qp);
       }
     }
   }
