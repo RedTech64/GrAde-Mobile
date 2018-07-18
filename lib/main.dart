@@ -5,7 +5,6 @@ import './gpa_calculator.dart';
 import './settings.dart';
 import './utils/auth.dart';
 import 'loading.dart';
-import 'dart:async';
 
 double version = 0.5;
 bool average = true;

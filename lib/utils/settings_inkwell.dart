@@ -5,7 +5,6 @@ const Duration _kUnconfirmedSplashDuration = const Duration(seconds: 1);
 const Duration _kSplashFadeDuration = const Duration(milliseconds: 500);
 
 const double _kSplashInitialSize = 0.0;
-const double _kSplashEndSize = 50.0;
 const double _kSplashConfirmedVelocity = 0.3;
 
 class CustomSplashFactory extends InteractiveInkFeatureFactory {
