@@ -4,13 +4,24 @@ import 'dart:async';
 import 'class_dialog.dart';
 import 'gpa_calculator.dart';
 
+class LinkData {
+  String id;
+  String name;
+  bool linked;
+
+  LinkData(this.id,this.name) {
+    this.linked = (id != "");
+  }
+}
+
 class Class extends StatelessWidget {
   final String _id;
   final String _name;
   final int _grade;
   final int _qp;
+  final LinkData _linkData;
 
-  Class(this._id,this._name,this._grade,this._qp);
+  Class(this._id,this._name,this._grade,this._qp,this._linkData);
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +78,7 @@ class Class extends StatelessWidget {
   Future _openEditClassDialog(context) async {
     ClassDialogData c = await Navigator.of(context).push(new MaterialPageRoute<ClassDialogData>(
         builder: (BuildContext context) {
-          return new ClassDialog(_name,_grade,_qp,true,false);
+          return new ClassDialog(_name,_grade,_qp,true,_linkData);
         },
         fullscreenDialog: true
     ));
@@ -75,7 +86,7 @@ class Class extends StatelessWidget {
       if(c.delete) {
         gpaCalculatorState.deleteClass(_id);
       } else {
-        gpaCalculatorState.editClass(_id,c.name,c.grade,c.qp);
+        gpaCalculatorState.editClass(_id,c.name,c.grade,c.qp,c.linkData);
       }
     }
   }

@@ -5,6 +5,7 @@ import 'thin_divider.dart';
 import 'class.dart';
 import 'class_dialog.dart';
 import 'dart:async';
+import 'grade_average.dart';
 
 GPACalculatorState gpaCalculatorState;
 
@@ -26,13 +27,15 @@ class GPACalculatorState extends State<GPACalculator> {
   String _userID;
   DocumentReference userData;
 
-  GPACalculatorState(this._userID);
+  GPACalculatorState(this._userID) {
+    userData = Firestore.instance.collection('users').document(_userID);
+  }
 
   @override
   void initState() {
     super.initState();
-    Firestore.instance.collection('users').document(_userID).get().then((doc) {
-      _setupData().then((result) {
+    _setupData().then((result) {
+      setState(() {
         userData = Firestore.instance.collection('users').document(_userID);
       });
     });
@@ -51,11 +54,13 @@ class GPACalculatorState extends State<GPACalculator> {
     }
   }
 
-  void addClass(name,grade,qp) async {
+  void addClass(name,grade,qp,linkData) async {
     DocumentReference classDoc = await userData.collection('classes').add({
       'name': name,
       'grade': grade,
       'qp': qp,
+      'linkID': linkData.id,
+      'linkName': linkData.name,
     });
     var id = classDoc.documentID;
     await classDoc.updateData({
@@ -63,23 +68,18 @@ class GPACalculatorState extends State<GPACalculator> {
     });
   }
 
-  void editClass(id,name,grade,qp) async {
+  void editClass(id,name,grade,qp,linkData) async {
     await userData.collection('classes').document(id).updateData({
       'name': name,
       'grade': grade,
       'qp': qp,
+      'linkID': linkData.id,
+      'linkName': linkData.name,
     });
   }
 
   void deleteClass(id) async {
     await userData.collection('classes').document(id).delete();
-  }
-
-  void link(String classID,String averageID) async {
-    var doc = Firestore.instance.collection('user').document(_userID).collection('classes').document(classID);
-    doc.updateData({
-      'link': averageID,
-    });
   }
 
   List<Widget> _buildClasses(classes) {
@@ -89,15 +89,28 @@ class GPACalculatorState extends State<GPACalculator> {
       var name = classes[i].data['name'];
       var grade = classes[i].data['grade'];
       var qp = classes[i].data['qp'];
+      var linkID = classes[i].data['linkID'];
       if(grade == null) {
         grade = 0;
       }
       if(qp == null) {
         qp = 0;
       }
-      list.add(new Class(id,name,grade,qp));
+      if(linkID != "") {
+        _updateLinkedData(classes[i]['id'],classes[i]['linkID']);
+      }
+      list.add(new Class(id,name,grade,qp,new LinkData(classes[i]['linkID'],classes[i]['linkName'])));
     }
     return list;
+  }
+
+  _updateLinkedData(classID,averageID) async {
+    DocumentSnapshot averageData = await userData.collection('averages').document(averageID).get();
+    var categories = averageData.data['categories'];
+    var grade = gradeAverageState.getOverallGrade(categories);
+    await userData.collection('classes').document(classID).updateData({
+      'grade': grade.toInt(),
+    });
   }
 
   @override
@@ -225,14 +238,13 @@ class GPACalculatorFAB extends StatelessWidget {
 }
 
 Future openCreateClassDialog(context) async {
-  List averages = await gpaCalculatorState.getAverages();
   ClassDialogData c = await Navigator.of(context).push(new MaterialPageRoute<ClassDialogData>(
       builder: (BuildContext context) {
-        return new ClassDialog("",100,0,false,false);
+        return new ClassDialog("",100,0,false,new LinkData("",""));
       },
       fullscreenDialog: true
   ));
   if(c != null) {
-    gpaCalculatorState.addClass(c.name, c.grade,c.qp);
+    gpaCalculatorState.addClass(c.name, c.grade,c.qp,c.linkData);
   }
 }

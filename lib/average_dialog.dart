@@ -24,7 +24,7 @@ class AverageDialog extends StatelessWidget {
           ],
         ),
         onPressed: () {
-          Navigator.pop(context, averages[i]['id']);
+          Navigator.pop(context, {'id': averages[i]['id'], 'name': averages[i]['name']});
         },
       ));
     }

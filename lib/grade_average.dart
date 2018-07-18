@@ -231,7 +231,7 @@ class GradeAverageState extends State<GradeAverage> {
                         new Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: new Text(
-                            '${_getOverallGrade(_categories).toStringAsFixed(2)}%',
+                            '${getOverallGrade(_categories).toStringAsFixed(2)}%',
                             style: new TextStyle(
                               fontSize: 34.0
                             ),
@@ -373,7 +373,7 @@ class GradeAverageState extends State<GradeAverage> {
     }
   }
 
-  double _getOverallGrade(categories) {
+  double getOverallGrade(categories) {
     double sum = 0.0;
     for(var i = 0; i < categories.length; i++) {
       sum += _getCategoryGrade(categories[i]['grades'])*(categories[i]['weight']/100);
@@ -426,7 +426,7 @@ class GradeAverageState extends State<GradeAverage> {
         }
       } else if(result != null) {
         setState(() {
-          _selectedAverage = result;
+          _selectedAverage = result['id'];
         });
       }
     }
