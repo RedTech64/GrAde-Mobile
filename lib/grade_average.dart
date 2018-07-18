@@ -345,6 +345,11 @@ class GradeAverageState extends State<GradeAverage> {
     );
   }
 
+  Future<List> getAverages() async {
+    var docs = await userData.collection('averages').getDocuments();
+    return docs.documents;
+  }
+
   String _getGradeDisplay() {
     if(_weightValue.floor() != 0) {
       return '${_gradeValue.floor().toString()}/${_weightValue.floor().toString()} (${((_gradeValue.floor()/_weightValue.floor())*100).floor()}%)';
@@ -409,7 +414,7 @@ class GradeAverageState extends State<GradeAverage> {
     if(averageLoaded) {
       result = await showDialog(
           context: context,
-          builder: (BuildContext context) => new AverageDialog(averages,true)
+          builder: (BuildContext context) => new AverageDialog(true)
       );
       if(result == -1) {
         addResult = await showDialog(

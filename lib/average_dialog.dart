@@ -1,12 +1,15 @@
+import 'loading.dart';
 import 'package:flutter/material.dart';
+import 'grade_average.dart';
+import 'dart:async';
 
 class AverageDialog extends StatelessWidget {
-  final averages;
   final bool add;
 
-  AverageDialog(this.averages,this.add);
+  AverageDialog(this.add);
 
-  List<Widget> _buildAverageElements(context) {
+  Future<List<Widget>> _buildAverageElements(context) async {
+    List averages = await gradeAverageState.getAverages();
     var list = <Widget>[];
     for(var i = 0; i < averages.length; i++) {
       list.add(new SimpleDialogOption(
@@ -30,36 +33,47 @@ class AverageDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new SimpleDialog(
-      title: new Text('Select Average'),
-      children: <Widget>[
-        new Divider(),
-        new Column(
-          children: <Widget>[
-            new Column(
-              children: _buildAverageElements(context),
-            ),
-          ],
-        ),
-        add ? new Divider() : new Container(),
-        add ? new SimpleDialogOption(
-          child: new Row(
+    return FutureBuilder(
+      future: _buildAverageElements(context),
+      builder: (BuildContext context, future) => new SimpleDialog(
+        title: new Text('Select Average'),
+        children: <Widget>[
+          new Divider(),
+          new Column(
             children: <Widget>[
-              new Icon(Icons.add),
-              new Text(
-                ' Add Average',
-                style: new TextStyle(
-                  fontSize: 18.0
-                )
+              new Column(
+                children: _getMenu(future),
               ),
             ],
           ),
-          onPressed: () {
-            Navigator.pop(context, -1);
-          },
-        ) : new Container(),
-      ]
+          add ? new Divider() : new Container(),
+          add ? new SimpleDialogOption(
+            child: new Row(
+              children: <Widget>[
+                new Icon(Icons.add),
+                new Text(
+                  ' Add Average',
+                  style: new TextStyle(
+                    fontSize: 18.0
+                  )
+                ),
+              ],
+            ),
+            onPressed: () {
+              Navigator.pop(context, -1);
+            },
+          ) : new Container(),
+        ]
+      ),
     ); 
+  }
+
+  _getMenu(future) {
+    if(future.data == null) {
+      return [new Loading()];
+    } else {
+      return future.data;
+    }
   }
 }
 

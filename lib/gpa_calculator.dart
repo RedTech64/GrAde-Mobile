@@ -228,7 +228,7 @@ Future openCreateClassDialog(context) async {
   List averages = await gpaCalculatorState.getAverages();
   ClassDialogData c = await Navigator.of(context).push(new MaterialPageRoute<ClassDialogData>(
       builder: (BuildContext context) {
-        return new ClassDialog("",100,0,false,false,averages);
+        return new ClassDialog("",100,0,false,false);
       },
       fullscreenDialog: true
   ));

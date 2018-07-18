@@ -18,11 +18,10 @@ class ClassDialog extends StatefulWidget {
   final int qp;
   final bool edit;
   final bool linked;
-  final List averages;
 
-  ClassDialog(this.name,this.grade,this.qp,this.edit,this.linked,this.averages);
+  ClassDialog(this.name,this.grade,this.qp,this.edit,this.linked);
 
-  State createState() => new ClassDialogState(name,grade.toDouble(),qp,edit,linked,averages);
+  State createState() => new ClassDialogState(name,grade.toDouble(),qp,edit,linked);
 }
 
 class ClassDialogState extends State<ClassDialog> {
@@ -32,9 +31,8 @@ class ClassDialogState extends State<ClassDialog> {
   bool _edit;
   bool _linked;
   var _controller;
-  List _averages;
 
-  ClassDialogState(this._name,this._grade,this._qp,this._edit,this._linked,this._averages);
+  ClassDialogState(this._name,this._grade,this._qp,this._edit,this._linked);
 
   @override
   void initState() {
@@ -149,7 +147,7 @@ class ClassDialogState extends State<ClassDialog> {
     var result;
     result = await showDialog(
         context: context,
-        builder: (BuildContext context) => new AverageDialog(_averages,false)
+        builder: (BuildContext context) => new AverageDialog(false)
     );
     if(result != null) {
       setState(() {
