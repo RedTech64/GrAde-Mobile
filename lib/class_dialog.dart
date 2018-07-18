@@ -90,6 +90,7 @@ class ClassDialogState extends State<ClassDialog> {
                       new Expanded(
                         child: new Text('Grade'),
                       ),
+                      _linkData.linked ? new Container() :
                       new Align(
                         alignment: AlignmentDirectional.centerEnd,
                         child: new Text(_grade.floor().toString()),
@@ -97,6 +98,7 @@ class ClassDialogState extends State<ClassDialog> {
                     ]
                 ),
               ),
+              _linkData.linked ? new Container() :
               new Slider(
                 min: 0.0,
                 max: 100.0,
