@@ -47,10 +47,22 @@ class SettingsState extends State<Settings> {
                           content: new SingleChildScrollView(
                             child: new Column(
                               children: <Widget>[
-                                new Text('Version: '+version.toString()),
-                                new Text('Published by RedTech Software'),
-                                new Text('Developed by Cole Weinman'),
-                                new Text('Email bugs, feedback and suggestions to grade@redtech.software'),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: new Text('Version: '+version.toString()),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: new Text('Published by RedTech Software'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: new Text('Developed by Cole Weinman'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: new Text('Email bugs, feedback and suggestions to grade@redtech.software'),
+                                ),
                               ],
                             ),
                         ),
