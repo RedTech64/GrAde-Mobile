@@ -22,7 +22,7 @@ class CategoryCard extends StatelessWidget {
         _text = _grade.toString();
       }
       list.add(new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+        padding: const EdgeInsets.all(2.0),
         child: new InputChip(
           label: new Text(_text),
           deleteIcon: new Icon(Icons.cancel),
@@ -93,7 +93,7 @@ class CategoryCard extends StatelessWidget {
           ),
           new ThinDivider(),
           new Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(6.0),
             child: new Wrap(
               children: _buildChips(_grades),
             ),
