@@ -210,6 +210,7 @@ class GradeAverageState extends State<GradeAverage> {
         }
         if(quickUpdate != 0) quickUpdate--;
         if(quickUpdate == 1) _uploadCategories();
+        _selectedCategory = snapshot.data['selectedCategory'];
         return new SingleChildScrollView(
           child: new Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
