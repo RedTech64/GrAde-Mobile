@@ -38,7 +38,7 @@ Future<bool> signInWithGoogle(bool silently) async {
   if(user == null) {
     return false;
   } else {
-    userID = user.providerData[0].uid.toString();
+    userID = user.uid.toString();
     await setupData();
     await initFCM();
     return true;
