@@ -150,7 +150,7 @@ class GradeAverageState extends State<GradeAverage> {
         }],
         'selectedCategory': 0,
       });
-      await docRef.setData({'selectedAverage': averageRef.documentID});
+      await docRef.updateData({'selectedAverage': averageRef.documentID});
       return true;
     } else {
       return true;

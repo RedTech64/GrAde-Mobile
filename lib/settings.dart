@@ -33,9 +33,7 @@ class SettingsState extends State<Settings> {
                   switchAccounts();
                 },
               ),
-              new Divider(
-                height: 0.0,
-              ),
+              new ThinDivider(),
               new SettingsOption(
                 mainLine: 'About',
                 onPressed: () {
