@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:GrAde/main.dart';
 
 final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 FirebaseUser user;
@@ -21,14 +20,14 @@ Future initFCM() async{
   );
 }
 
-Future<bool> signInWithGoogle(bool force) async {
-  if(force) {
-    googleUser = await _googleSignIn.signIn();
-  } else {
+Future<bool> signInWithGoogle(bool silently) async {
+  if(silently) {
     googleUser = await _googleSignIn.signInSilently();
     if(googleUser == null) {
-      googleUser = await _googleSignIn.signIn();
+      return false;
     }
+  } else {
+    googleUser = await _googleSignIn.signIn();
   }
 
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -39,15 +38,16 @@ Future<bool> signInWithGoogle(bool force) async {
   if(user == null) {
     return false;
   } else {
-    userID = user.providerData[0].uid;
+    userID = user.providerData[0].uid.toString();
     await setupData();
+    await initFCM();
     return true;
   }
 }
 
 Future<void> switchAccounts() async {
   await _googleSignIn.signOut();
-  await signInWithGoogle(true);
+  await signInWithGoogle(false);
 }
 
 Future setupData() async {

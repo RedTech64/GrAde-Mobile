@@ -5,6 +5,7 @@ import './gpa_calculator.dart';
 import './settings.dart';
 import './utils/auth.dart';
 import 'loading.dart';
+import 'welcome.dart';
 
 double version = 0.5;
 bool average = true;
@@ -21,6 +22,7 @@ class GrAdeApp extends StatelessWidget {
       home: new MainView(),
       routes: <String, WidgetBuilder> {
         '/settings': (BuildContext context) => new Settings(),
+        '/welcome': (BuildContext context) => new Welcome(),
       },
     );
   }
@@ -42,12 +44,25 @@ class MainViewState extends State<MainView> {
   @override
   void initState() {
     super.initState();
-    signInWithGoogle(false).then((result) {
-      initFCM();
-      gradeAverage =  new GradeAverage(new Key(userID), userID);
-      gpaCalculator = new GPACalculator(new Key(userID), userID);
-      _changePage(0);
+    signInWithGoogle(true).then((signedin) {
+      if(signedin) {
+        gradeAverage =  new GradeAverage(new Key(userID), userID);
+        gpaCalculator = new GPACalculator(new Key(userID), userID);
+        _changePage(0);
+      } else {
+        _initialize();
+      }
     });
+  }
+
+  void _initialize() async {
+    var uid = await Navigator.of(context).pushNamed('/welcome');
+    if(uid == null) {
+      _initialize();
+    }
+    gradeAverage =  new GradeAverage(new Key(uid), uid);
+    gpaCalculator = new GPACalculator(new Key(uid), uid);
+    _changePage(0);
   }
 
   @override

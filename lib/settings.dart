@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import './utils/auth.dart';
 import 'settings_option.dart';
 import 'main.dart';
+import 'thin_divider.dart';
 
 class Settings extends StatefulWidget {
   @override
