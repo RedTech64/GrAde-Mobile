@@ -119,7 +119,7 @@ class GradeAverageState extends State<GradeAverage> {
       _categories[category.index] = {
         'name': category.name,
         'weight': category.weight,
-        'grades': []
+        'grades': _categories[category.index]['grades']
       };
       quickUpdate = 2;
     });

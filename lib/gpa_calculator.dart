@@ -210,10 +210,18 @@ class GPACalculatorState extends State<GPACalculator> {
     double sum = 0.0;
     for(var i = 0; i < classes.length; i++) {
       var c = classes[i].data;
-      if (c['grade'] + c['qp'] > 100 + c['qp']) {
-        sum += 100 + c['qp'];
+      var grade = c['grade'];
+      var qp = c['qp'];
+      if(grade == null) {
+        grade = 0;
+      }
+      if(qp == null) {
+        qp = 0;
+      }
+      if (grade + qp > 100 + qp) {
+        sum += 100 + qp;
       } else {
-        sum += c['grade'] + c['qp'];
+        sum += grade + qp;
       }
     }
     if(classes.length == 0) {

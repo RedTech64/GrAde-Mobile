@@ -35,7 +35,7 @@ class Class extends StatelessWidget {
               new Expanded(
                 flex: 2,
                 child: new Text(
-                  _name,
+                  _getName(),
                   textAlign: TextAlign.start,
                   style: new TextStyle(
                     fontSize: 20.0,
@@ -73,6 +73,14 @@ class Class extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _getName() {
+    if(_name == "") {
+      return "Unnamed";
+    } else {
+      return _name;
+    }
   }
 
   Future _openEditClassDialog(context) async {
