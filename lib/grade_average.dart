@@ -75,15 +75,15 @@ class GradeAverageState extends State<GradeAverage> {
   }
 
   void deleteAverage(String averageID) async {
+    var name = await userData.collection('averages').document(averageID).get();
+    name = name.data['name'];
+    sendAverageDeleteEvent(name);
     await userData.collection('averages').document(averageID).delete();
     QuerySnapshot docs = await userData.collection('averages').limit(1).getDocuments();
     DocumentSnapshot firstDoc = docs.documents[0];
     setState(() {
       _selectedAverage = firstDoc.documentID;
     });
-    var name = await userData.collection('averages').document(averageID).get();
-    name = name.data['name'];
-    sendAverageDeleteEvent(name);
   }
 
   void addGrade() {

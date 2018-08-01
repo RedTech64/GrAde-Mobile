@@ -10,3 +10,5 @@ packages
 .flutter-plugins
 
 android/key\.properties
+
+local\.properties

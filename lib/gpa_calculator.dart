@@ -82,11 +82,11 @@ class GPACalculatorState extends State<GPACalculator> {
   }
 
   void deleteClass(id) async {
-    await userData.collection('classes').document(id).delete();
     DocumentSnapshot c = await userData.collection('classes').document(id).get();
     bool linked = false;
     if(c.data['linkID'] != "") linked = true;
-    sendClassAddEvent(c.data['name'], c.data['grade'], c.data['qp'],linked);
+    sendClassDeleteEvent(c.data['name'], c.data['grade'], c.data['qp'],linked);
+    await userData.collection('classes').document(id).delete();
   }
 
   List<Widget> _buildClasses(classes) {
