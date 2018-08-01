@@ -7,6 +7,7 @@ import 'main.dart';
 import 'loading.dart';
 import 'dart:async';
 import 'thin_divider.dart';
+import 'utils/analytics.dart';
 
 bool averageLoaded = false;
 GradeAverageState gradeAverageState;
@@ -65,10 +66,12 @@ class GradeAverageState extends State<GradeAverage> {
       }]
     });
     userData.updateData({'selectedAverage': id});
+    sendAverageAddEvent(name);
   }
 
   void updateAverage(name) {
     userData.collection('averages').document(_selectedAverage).updateData({'name': name});
+    sendAverageEditEvent(name);
   }
 
   void deleteAverage(String averageID) async {
@@ -78,28 +81,37 @@ class GradeAverageState extends State<GradeAverage> {
     setState(() {
       _selectedAverage = firstDoc.documentID;
     });
+    var name = await userData.collection('averages').document(averageID).get();
+    name = name.data['name'];
+    sendAverageDeleteEvent(name);
   }
 
   void addGrade() {
+    var grade = _gradeValue.floor().toInt();
+    var weight = _weightValue.floor().toInt();
     setState(() {
       var grades = fixArray(_categories[_selectedCategory]['grades']);
       grades.add({
-        'grade': _gradeValue.floor().toInt(),
-        'weight': _weightValue.floor().toInt()
+        'grade': grade,
+        'weight': weight
       });
       quickUpdate = 2;
       _categories[_selectedCategory]['grades'] = grades;
     });
+    sendGradeAddEvent(grade, weight);
   }
 
   void deleteGrade(int categoryIndex,int gradeIndex) {
-      setState(() {
-        var grades = fixArray(_categories[categoryIndex]['grades']);
-        grades.removeAt(gradeIndex);
-        quickUpdate = 2;
-        _categories[categoryIndex]['grades'] = grades;
-      });
-    }
+    var grade = _categories[categoryIndex]['grades'][gradeIndex]['grade'];
+    var weight = _categories[categoryIndex]['grades'][gradeIndex]['weight'];
+    setState(() {
+      var grades = fixArray(_categories[categoryIndex]['grades']);
+      grades.removeAt(gradeIndex);
+      quickUpdate = 2;
+      _categories[categoryIndex]['grades'] = grades;
+    });
+    sendGradeDeleteEvent(grade, weight);
+  }
 
   void addCategory(Category category) {
     List categories = fixArray(_categories);
@@ -112,6 +124,7 @@ class GradeAverageState extends State<GradeAverage> {
       _categories = categories;
       quickUpdate = 2;
     });
+    sendCategoryAddEvent(category.name, category.weight);
   }
 
   void editCategory(Category category) {
@@ -123,6 +136,7 @@ class GradeAverageState extends State<GradeAverage> {
       };
       quickUpdate = 2;
     });
+    sendCategoryEditEvent(category.name, category.weight);
   }
 
   void deleteCategory(Category category) {
@@ -132,6 +146,7 @@ class GradeAverageState extends State<GradeAverage> {
       _categories = categories;
       quickUpdate = 2;
     });
+    sendCategoryDeleteEvent(category.name, category.weight);
   }
 
   Future<bool> _setupData() async {

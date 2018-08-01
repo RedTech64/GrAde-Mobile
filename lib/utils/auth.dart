@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'analytics.dart';
 
 final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 FirebaseUser user;
@@ -39,6 +40,7 @@ Future<bool> signInWithGoogle(bool silently) async {
     return false;
   } else {
     userID = user.uid.toString();
+    await setupAnalytics(userID);
     await setupData();
     await initFCM();
     return true;

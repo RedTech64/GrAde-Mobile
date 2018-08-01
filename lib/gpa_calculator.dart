@@ -6,6 +6,7 @@ import 'class.dart';
 import 'class_dialog.dart';
 import 'dart:async';
 import 'grade_average.dart';
+import 'utils/analytics.dart';
 
 GPACalculatorState gpaCalculatorState;
 
@@ -66,6 +67,7 @@ class GPACalculatorState extends State<GPACalculator> {
     await classDoc.updateData({
       'id': id,
     });
+    sendClassAddEvent(name, grade, qp,linkData.linked);
   }
 
   void editClass(id,name,grade,qp,linkData) async {
@@ -76,10 +78,15 @@ class GPACalculatorState extends State<GPACalculator> {
       'linkID': linkData.id,
       'linkName': linkData.name,
     });
+    sendClassEditEvent(name, grade, qp,linkData.linked);
   }
 
   void deleteClass(id) async {
     await userData.collection('classes').document(id).delete();
+    DocumentSnapshot c = await userData.collection('classes').document(id).get();
+    bool linked = false;
+    if(c.data['linkID'] != "") linked = true;
+    sendClassAddEvent(c.data['name'], c.data['grade'], c.data['qp'],linked);
   }
 
   List<Widget> _buildClasses(classes) {

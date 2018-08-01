@@ -6,6 +6,7 @@ import './settings.dart';
 import './utils/auth.dart';
 import 'loading.dart';
 import 'welcome.dart';
+import 'utils/analytics.dart';
 
 double version = 0.5;
 bool average = true;
@@ -106,6 +107,7 @@ class MainViewState extends State<MainView> {
   }
 
   void openSettings() async {
+    sendSettingsOpenEvent();
     await Navigator.of(context).pushNamed('/settings');
     _updateUser();
   }
