@@ -39,8 +39,9 @@ class MainViewState extends State<MainView> {
   GradeAverage gradeAverage;
   GPACalculator gpaCalculator;
   Widget _page = new Loading();
-  Widget _fab = GradeAverageFAB();
+  Widget _fab = GradeAverageFAB(new Key("true"),true);
   int _currentIndex = 0;
+  int keyCount = 0;
 
   @override
   void initState() {
@@ -116,12 +117,12 @@ class MainViewState extends State<MainView> {
     setState(() {
       if(index == 0) {
         _page = gradeAverage;
-        _fab = new GradeAverageFAB();
+        _fab = new GradeAverageFAB(new Key(simpleFAB.toString()),simpleFAB);
         _currentIndex = 0;
         average = true;
       } else {
         _page = gpaCalculator;
-        _fab = new GPACalculatorFAB();
+        _fab = new GPACalculatorFAB(new Key(simpleFAB.toString()),simpleFAB);
         _currentIndex = 1;
         average = false;
       }
@@ -131,14 +132,15 @@ class MainViewState extends State<MainView> {
   void _updateUser() {
     setState(() {
       if(_currentIndex == 0) {
-        _page = new GradeAverage(new Key(userID),userID);
-        _currentIndex = 0;
+        _page = new GradeAverage(new Key(userID+keyCount.toString()),userID);
+        _fab = new GradeAverageFAB(new Key(simpleFAB.toString()),simpleFAB);
         average = true;
       } else {
-        _page = new GPACalculator(new Key(userID), userID);
-        _currentIndex = 1;
+        _page = new GPACalculator(new Key(userID+keyCount.toString()), userID);
+        _fab = new GPACalculatorFAB(new Key(simpleFAB.toString()),simpleFAB);
         average = false;
       }
+      keyCount = keyCount+1;
     });
   }
 }

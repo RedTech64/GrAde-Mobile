@@ -28,14 +28,14 @@ class SettingsState extends State<Settings> {
         child: new Center(
           child: new Column(
             children: <Widget>[
-              new SettingsOption(
+              new SimpleSettingsOption(
                 mainLine: 'Switch Accounts',
                 onPressed: () {
                   switchAccounts();
                 },
               ),
               new ThinDivider(),
-              new SettingsOption(
+              new SimpleSettingsOption(
                 mainLine: 'About',
                 onPressed: () {
                   showDialog(
@@ -78,9 +78,17 @@ class SettingsState extends State<Settings> {
                   );
                 },
               ),
-              new Divider(
-                height: 0.0,
+              new ThinDivider(),
+              new SwitchSettingsOption(
+                  mainLine: "Simple Add Buttons",
+                  secondLine: "Removes text from lower FAB",
+                  switchValue: simpleFAB,
+                  onPressed: () {
+                    simpleFAB = !simpleFAB;
+                    updateSettings();
+                  }
               ),
+              new ThinDivider(),
             ],
           ),
         ),

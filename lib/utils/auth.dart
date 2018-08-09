@@ -9,6 +9,7 @@ final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 FirebaseUser user;
 GoogleSignInAccount googleUser;
 String userID;
+bool simpleFAB;
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
@@ -40,9 +41,9 @@ Future<bool> signInWithGoogle(bool silently) async {
     return false;
   } else {
     userID = user.uid.toString();
-    await setupAnalytics(userID);
+    setupAnalytics(userID);
     await setupData();
-    await initFCM();
+    initFCM();
     return true;
   }
 }
@@ -56,6 +57,12 @@ Future setupData() async {
   DocumentReference userDocRef = Firestore.instance.collection('users').document(userID);
   DocumentSnapshot userDoc = await userDocRef.get();
   if(userDoc.exists) {
+    if(userDoc.data['simpleFAB'] == null) {
+      simpleFAB = false;
+      await updateSettings();
+    } else {
+      simpleFAB = userDoc.data['simpleFAB'];
+    }
     return userDocRef.updateData({
       'name': googleUser.displayName,
       'email': googleUser.email,
@@ -68,8 +75,16 @@ Future setupData() async {
       'email': googleUser.email,
       'id': user.uid,
       'mobile': true,
+      'simpleFAB': false,
     });
   }
+}
+
+Future updateSettings() async {
+  DocumentReference userDocRef = Firestore.instance.collection('users').document(userID);
+  userDocRef.updateData({
+    'simpleFAB': simpleFAB
+  });
 }
 
 Future deleteData() async {

@@ -240,15 +240,31 @@ class GPACalculatorState extends State<GPACalculator> {
 }
 
 class GPACalculatorFAB extends StatelessWidget {
+  final Key key;
+  final bool simple;
+
+  GPACalculatorFAB(this.key,this.simple);
+
   @override
   Widget build(BuildContext context) {
-    return new FloatingActionButton.extended(
-      label: new Text('Add Class'),
-      icon: new Icon(Icons.add_box),
-      onPressed: () {
-        openCreateClassDialog(context);
-      },
-    );
+    if(!simple) {
+      return new FloatingActionButton.extended(
+        heroTag: "btn1",
+        label: new Text('Add Class'),
+        icon: new Icon(Icons.add_box),
+        onPressed: () {
+          openCreateClassDialog(context);
+        },
+      );
+    } else {
+      return new FloatingActionButton(
+        heroTag: "btn2",
+        child: new Icon(Icons.add_box),
+        onPressed: () {
+          openCreateClassDialog(context);
+        },
+      );
+    }
   }
 }
 

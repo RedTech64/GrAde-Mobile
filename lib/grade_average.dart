@@ -8,6 +8,7 @@ import 'loading.dart';
 import 'dart:async';
 import 'thin_divider.dart';
 import 'utils/analytics.dart';
+import 'utils/auth.dart';
 
 bool averageLoaded = false;
 GradeAverageState gradeAverageState;
@@ -290,7 +291,10 @@ class GradeAverageState extends State<GradeAverage> {
                           child: new Row(
                             children: <Widget>[
                               new Text(
-                                'Grade:'
+                                '  Grade:',
+                                style: new TextStyle(
+                                  fontSize: 16.0,
+                                ),
                               ),
                               new Expanded(
                                   child: new Slider(
@@ -312,7 +316,10 @@ class GradeAverageState extends State<GradeAverage> {
                           child: new Row(
                             children: <Widget>[
                               new Text(
-                                'Weight:'
+                                'Weight:',
+                                style: new TextStyle(
+                                  fontSize: 16.0,
+                                ),
                               ),
                               new Expanded(
                                   child: new Slider(
@@ -341,6 +348,8 @@ class GradeAverageState extends State<GradeAverage> {
                           padding: const EdgeInsets.all(8.0),
                           child: new RaisedButton(
                             child: new Text('ADD'),
+                            color: Color.fromRGBO(215, 215, 215, 20.0),
+                            shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
                             onPressed: () {
                               addGrade();
                             },
@@ -467,15 +476,31 @@ class CategoryGrade extends StatelessWidget {
 }
 
 class GradeAverageFAB extends StatelessWidget {
+  final Key key;
+  final simple;
+
+  GradeAverageFAB(this.key,this.simple);
+
   @override
   Widget build(BuildContext context) {
-    return new FloatingActionButton.extended(
-      label: new Text('Add Category'),
-      icon: new Icon(Icons.add_box),
-      onPressed: () {
-        if(average) openCreateCategoryDialog(context);
-      },
-    );
+    if(!simple) {
+      return new FloatingActionButton.extended(
+        heroTag: "btn1",
+        label: new Text('Add Category'),
+        icon: new Icon(Icons.add_box),
+        onPressed: () {
+          if(average) openCreateCategoryDialog(context);
+        },
+      );
+    } else {
+      return new FloatingActionButton(
+        heroTag: "btn2",
+        child: new Icon(Icons.add),
+        onPressed: () {
+          if(average) openCreateCategoryDialog(context);
+        },
+      );
+    }
   }
 }
 
