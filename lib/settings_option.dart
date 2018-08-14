@@ -99,6 +99,7 @@ class SwitchSettingsOptionState extends State<SwitchSettingsOption> {
                         new Text(
                           secondLine,
                           style: new TextStyle(
+                            color: Colors.grey
                           ),
                         ),
                       ],

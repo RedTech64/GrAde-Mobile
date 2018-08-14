@@ -94,11 +94,21 @@ class CategoryDialogState extends State<CategoryDialog> {
                   child: new Row(
                   children: <Widget>[
                     new Expanded(
-                      child: new Text('Weight'),
+                      child: new Text(
+                        'Weight',
+                        style: new TextStyle(
+                          fontSize: 15.0,
+                        ),
+                      ),
                     ),
                     new Align(
                       alignment: AlignmentDirectional.centerEnd,
-                      child: new Text(_weight.floor().toString()),
+                      child: new Text(
+                        _weight.floor().toString()+"%",
+                        style: new TextStyle(
+                          fontSize: 15.0,
+                        ),
+                      ),
                     ),
                   ]
                 ),

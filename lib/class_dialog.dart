@@ -88,12 +88,22 @@ class ClassDialogState extends State<ClassDialog> {
                 child: new Row(
                     children: <Widget>[
                       new Expanded(
-                        child: new Text('Grade'),
+                        child: new Text(
+                          'Grade',
+                          style: new TextStyle(
+                            fontSize: 15.0,
+                          ),
+                        ),
                       ),
                       _linkData.linked ? new Container() :
                       new Align(
                         alignment: AlignmentDirectional.centerEnd,
-                        child: new Text(_grade.floor().toString()),
+                        child: new Text(
+                          _grade.floor().toString()+"%",
+                          style: new TextStyle(
+                            fontSize: 15.0,
+                          ),
+                        ),
                       ),
                     ]
                 ),
@@ -134,11 +144,21 @@ class ClassDialogState extends State<ClassDialog> {
                 child: new Row(
                     children: <Widget>[
                       new Expanded(
-                        child: new Text('Quality Points'),
+                        child: new Text(
+                          'Quality Points',
+                          style: new TextStyle(
+                            fontSize: 15.0,
+                          ),
+                        ),
                       ),
                       new Align(
                         alignment: AlignmentDirectional.centerEnd,
-                        child: new Text(_qp.toString()),
+                        child: new Text(
+                          _qp.toString()+"%",
+                          style: new TextStyle(
+                            fontSize: 15.0,
+                          ),
+                        ),
                       ),
                     ]
                 ),
