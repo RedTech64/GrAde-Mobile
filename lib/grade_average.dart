@@ -67,6 +67,9 @@ class GradeAverageState extends State<GradeAverage> {
       }]
     });
     userData.updateData({'selectedAverage': id});
+    setState(() {
+      _selectedAverage = id;
+    });
     sendAverageAddEvent(name);
   }
 
@@ -82,6 +85,7 @@ class GradeAverageState extends State<GradeAverage> {
     await userData.collection('averages').document(averageID).delete();
     QuerySnapshot docs = await userData.collection('averages').limit(1).getDocuments();
     DocumentSnapshot firstDoc = docs.documents[0];
+    userData.updateData({'selectedAverage': firstDoc.documentID});
     setState(() {
       _selectedAverage = firstDoc.documentID;
     });
