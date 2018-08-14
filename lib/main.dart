@@ -7,6 +7,7 @@ import './utils/auth.dart';
 import 'loading.dart';
 import 'welcome.dart';
 import 'utils/analytics.dart';
+import 'dart:async';
 
 double version = 0.5;
 bool average = true;
@@ -46,10 +47,11 @@ class MainViewState extends State<MainView> {
   @override
   void initState() {
     super.initState();
-    signInWithGoogle(true).then((signedin) {
-      if(signedin) {
-        gradeAverage =  new GradeAverage(new Key(userID), userID);
-        gpaCalculator = new GPACalculator(new Key(userID), userID);
+    signInWithGoogle(true).then((data) {
+      print(data.uid);
+      if(data.signedin) {
+        gradeAverage =  new GradeAverage(new Key(data.uid), data.uid);
+        gpaCalculator = new GPACalculator(new Key(data.uid), data.uid);
         _changePage(0);
       } else {
         _initialize();
@@ -57,13 +59,20 @@ class MainViewState extends State<MainView> {
     });
   }
 
-  void _initialize() async {
-    var uid = await Navigator.of(context).pushNamed('/welcome');
-    if(uid == null) {
-      _initialize();
+  Future _initialize() async {
+    WelcomePageData data = await Navigator.of(context).push(new MaterialPageRoute<WelcomePageData>(
+        builder: (BuildContext context) {
+          return new Welcome();
+        },
+        fullscreenDialog: true
+    ));
+    if(data.uid == null) {
+      await _initialize();
     }
-    gradeAverage =  new GradeAverage(new Key(uid), uid);
-    gpaCalculator = new GPACalculator(new Key(uid), uid);
+    gradeAverage =  new GradeAverage(new Key(data.uid), data.uid);
+    gpaCalculator = new GPACalculator(new Key(data.uid), data.uid);
+    userID = data.uid;
+    simpleFAB = data.simpleFAB;
     _changePage(0);
   }
 

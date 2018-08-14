@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:GrAde/utils/auth.dart';
 
+class WelcomePageData {
+  String uid;
+  bool simpleFAB;
+  
+  WelcomePageData(this.uid,this.simpleFAB);
+}
+
 class Welcome extends StatefulWidget {
   @override
   State createState() => new WelcomeState();
 }
 
 class WelcomeState extends State<Welcome> {
+  bool _tapped = false;
 
   @override
   void initState() {
@@ -57,6 +65,7 @@ class WelcomeState extends State<Welcome> {
             new SizedBox(
               height: 20.0,
             ),
+            _tapped ? new CircularProgressIndicator() :
             new RaisedButton(
               child: new Text(
                 'SIGN IN WITH GOOGLE',
@@ -66,10 +75,17 @@ class WelcomeState extends State<Welcome> {
               ),
               color: Colors.redAccent,
               onPressed: () {
-                signInWithGoogle(false).then((signedin) {
-                  if(signedin) {
-                    print(userID);
-                    Navigator.pop(context,userID);
+                setState(() {
+                  _tapped = true;
+                });
+                signInWithGoogle(false).then((data) {
+                  if(data.signedin) {
+                    print(data.simpleFAB);
+                    Navigator.pop(context,new WelcomePageData(data.uid, data.simpleFAB));
+                  } else {
+                    setState(() {
+                      _tapped = false;
+                    });
                   }
                 });
               }

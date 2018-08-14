@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'analytics.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 FirebaseUser user;
@@ -12,6 +13,14 @@ String userID;
 bool simpleFAB;
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
+
+class SignInData {
+  String uid;
+  bool simpleFAB;
+  bool signedin;
+
+  SignInData(this.uid,this.simpleFAB,this.signedin);
+}
 
 Future initFCM() async{
   _firebaseMessaging.requestNotificationPermissions();
@@ -22,14 +31,22 @@ Future initFCM() async{
   );
 }
 
-Future<bool> signInWithGoogle(bool silently) async {
+Future setupFRC() async {
+  final RemoteConfig remoteConfig = await RemoteConfig.instance;
+}
+
+Future<SignInData> signInWithGoogle(bool silently) async {
   if(silently) {
     googleUser = await _googleSignIn.signInSilently();
     if(googleUser == null) {
-      return false;
+      return new SignInData("", false, false);
     }
   } else {
-    googleUser = await _googleSignIn.signIn();
+    try {
+      googleUser = await _googleSignIn.signIn();
+    } catch(e) {
+      return new SignInData("", false, false);
+    }
   }
 
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -38,13 +55,14 @@ Future<bool> signInWithGoogle(bool silently) async {
     idToken: googleAuth.idToken,
   );
   if(user == null) {
-    return false;
+    return new SignInData("", false, false);
   } else {
     userID = user.uid.toString();
     setupAnalytics(userID);
     await setupData();
+    await setupFRC();
     initFCM();
-    return true;
+    return new SignInData(user.uid, simpleFAB, true);
   }
 }
 
@@ -70,6 +88,7 @@ Future setupData() async {
       'mobile': true,
     });
   } else {
+    simpleFAB = false;
     return userDocRef.setData({
       'name': googleUser.displayName,
       'email': googleUser.email,
