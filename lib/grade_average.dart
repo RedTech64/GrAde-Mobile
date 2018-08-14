@@ -30,7 +30,7 @@ class GradeAverageState extends State<GradeAverage> {
   var _gradeValue = 100.0;
   var _weightValue = 100.0;
   String _selectedAverage;
-  int _selectedCategory;
+  int _selectedCategory = 0;
   var _categories = [];
   bool dataExists = false;
   int quickUpdate = 0;
@@ -76,8 +76,8 @@ class GradeAverageState extends State<GradeAverage> {
   }
 
   void deleteAverage(String averageID) async {
-    var name = await userData.collection('averages').document(averageID).get();
-    name = name.data['name'];
+    DocumentSnapshot data = await userData.collection('averages').document(averageID).get();
+    String name = data.data['name'];
     sendAverageDeleteEvent(name);
     await userData.collection('averages').document(averageID).delete();
     QuerySnapshot docs = await userData.collection('averages').limit(1).getDocuments();
@@ -226,7 +226,6 @@ class GradeAverageState extends State<GradeAverage> {
         }
         if(quickUpdate != 0) quickUpdate--;
         if(quickUpdate == 1) _uploadCategories();
-        _selectedCategory = snapshot.data['selectedCategory'];
         return new SingleChildScrollView(
           child: new Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
@@ -291,7 +290,7 @@ class GradeAverageState extends State<GradeAverage> {
                           child: new Row(
                             children: <Widget>[
                               new Text(
-                                '  Grade:',
+                                ' Points:',
                                 style: new TextStyle(
                                   fontSize: 16.0,
                                 ),
@@ -347,8 +346,13 @@ class GradeAverageState extends State<GradeAverage> {
                         new Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: new RaisedButton(
-                            child: new Text('ADD'),
-                            color: Color.fromRGBO(215, 215, 215, 20.0),
+                            child: new Text(
+                              'ADD',
+                              style: new TextStyle(
+                                color: Colors.white
+                              ),
+                            ),
+                            color: Colors.blue,
                             shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
                             onPressed: () {
                               addGrade();
@@ -450,6 +454,9 @@ class GradeAverageState extends State<GradeAverage> {
           addAverage(addResult['name']);
         }
       } else if(result != null) {
+        userData.updateData({
+          'selectedAverage': result['id']
+        });
         setState(() {
           _selectedAverage = result['id'];
         });
