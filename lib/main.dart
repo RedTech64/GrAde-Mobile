@@ -22,6 +22,7 @@ class GrAdeApp extends StatelessWidget {
     return new MaterialApp(
       title: 'GrAde',
       home: new MainView(),
+      debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder> {
         '/settings': (BuildContext context) => new Settings(),
         '/welcome': (BuildContext context) => new Welcome(),
