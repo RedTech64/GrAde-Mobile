@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:GrAde/utils/auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WelcomePageData {
   String uid;
@@ -90,9 +91,28 @@ class WelcomeState extends State<Welcome> {
                 });
               }
             ),
+            new SizedBox(
+              height: 20.0,
+            ),
+            new FlatButton(
+                child: new Text(
+                  'PRIVACY POLICY'
+                ),
+                onPressed: _launchURL
+            ),
           ],
         ),
       ),
     );
   }
+
+  _launchURL() async {
+    const url = 'https://sites.google.com/view/grade-privacy-policy/home';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
 }

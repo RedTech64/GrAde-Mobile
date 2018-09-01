@@ -12,6 +12,7 @@ dependencies:
   firebase_remote_config: "0.0.2"
   cupertino_icons: "0.1.0"
   google_sign_in: "3.0.4"
+  url_launcher: "3.0.3"
 
 flutter:
   uses-material-design: true
