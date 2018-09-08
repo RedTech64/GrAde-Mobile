@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:GrAde/utils/auth.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:io' show Platform;
 
 class WelcomePageData {
   String uid;
@@ -79,9 +80,9 @@ class WelcomeState extends State<Welcome> {
                 setState(() {
                   _tapped = true;
                 });
+                signOut();
                 signInWithGoogle(false).then((data) {
                   if(data.signedin) {
-                    print(data.simpleFAB);
                     Navigator.pop(context,new WelcomePageData(data.uid, data.simpleFAB));
                   } else {
                     setState(() {
@@ -92,7 +93,27 @@ class WelcomeState extends State<Welcome> {
               }
             ),
             new SizedBox(
-              height: 20.0,
+              height: 5.0,
+            ),
+            Platform.isIOS ?
+            new FlatButton(
+                child: new Text(
+                  'SIGN IN ANYNOMOUSLY',
+                  style: new TextStyle(
+                    fontSize: 16.0,
+                  ),
+                ),
+                onPressed: () {
+                  signOut();
+                  signInAnonymously().then((data) {
+                    if(data.signedin) {
+                      Navigator.pop(context,new WelcomePageData(data.uid, data.simpleFAB));
+                    }
+                  });
+                }
+            ) : new Container(),
+            new SizedBox(
+              height: 6.0,
             ),
             new FlatButton(
                 child: new Text(
