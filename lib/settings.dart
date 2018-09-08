@@ -29,9 +29,9 @@ class SettingsState extends State<Settings> {
           child: new Column(
             children: <Widget>[
               new SimpleSettingsOption(
-                mainLine: 'Switch Accounts',
+                mainLine: 'Sign Out',
                 onPressed: () {
-                  switchAccounts();
+                  Navigator.of(context).pop({'signout': true});
                 },
               ),
               new ThinDivider(),

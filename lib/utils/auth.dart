@@ -12,7 +12,7 @@ GoogleSignInAccount googleUser;
 String userID;
 bool simpleFAB;
 final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn _googleSignIn = new GoogleSignIn();
+GoogleSignIn _googleSignIn = new GoogleSignIn();
 
 class SignInData {
   String uid;
@@ -59,20 +59,37 @@ Future<SignInData> signInWithGoogle(bool silently) async {
   } else {
     userID = user.uid.toString();
     setupAnalytics(userID);
-    await setupData();
+    await setupData(user.uid.toString());
     await setupFRC();
     initFCM();
     return new SignInData(user.uid, simpleFAB, true);
   }
 }
 
-Future<void> switchAccounts() async {
-  await _googleSignIn.signOut();
-  await signInWithGoogle(false);
+Future<SignInData> signInAnonymously() async {
+  user = await _auth.signInAnonymously();
+  userID = user.uid.toString();
+  print("UID: "+user.uid.toString());
+  setupAnalytics(userID);
+  await setupData(user.uid.toString());
+  await setupFRC();
+  initFCM();
+  return new SignInData(user.uid, simpleFAB, true);
 }
 
-Future setupData() async {
-  DocumentReference userDocRef = Firestore.instance.collection('users').document(userID);
+Future<void> signOut() async {
+  print(_googleSignIn.currentUser);
+  //await _googleSignIn.signOut();
+  await _googleSignIn.disconnect();
+  user = null;
+  googleUser = null;
+  userID = null;
+  _googleSignIn = null;
+  _googleSignIn = new GoogleSignIn();
+}
+
+Future setupData(id) async {
+  DocumentReference userDocRef = Firestore.instance.collection('users').document(id);
   DocumentSnapshot userDoc = await userDocRef.get();
   if(userDoc.exists) {
     if(userDoc.data['simpleFAB'] == null) {
@@ -81,21 +98,29 @@ Future setupData() async {
     } else {
       simpleFAB = userDoc.data['simpleFAB'];
     }
-    return userDocRef.updateData({
-      'name': googleUser.displayName,
-      'email': googleUser.email,
-      'id': user.uid,
+    if(!user.isAnonymous) {
+      await userDocRef.updateData({
+        'name': googleUser.displayName,
+        'email': googleUser.email,
+      });
+    }
+    await userDocRef.updateData({
+      'id': id,
       'mobile': true,
     });
   } else {
     simpleFAB = false;
-    return userDocRef.setData({
-      'name': googleUser.displayName,
-      'email': googleUser.email,
-      'id': user.uid,
+    await userDocRef.setData({
+      'id': id,
       'mobile': true,
       'simpleFAB': false,
     });
+    if(!user.isAnonymous) {
+      await userDocRef.updateData({
+        'name': googleUser.displayName,
+        'email': googleUser.email,
+      });
+    }
   }
 }
 
@@ -117,5 +142,5 @@ Future deleteData() async {
     doc.reference.delete();
   });
   await Firestore.instance.collection('users').document(userID).delete();
-  return await setupData();
+  return await setupData(userID);
 }

@@ -119,7 +119,16 @@ class MainViewState extends State<MainView> {
 
   void openSettings() async {
     sendSettingsOpenEvent();
-    await Navigator.of(context).pushNamed('/settings');
+    Map result = await Navigator.of(context).push(new MaterialPageRoute<Map>(
+        builder: (BuildContext context) {
+          return new Settings();
+        },
+        fullscreenDialog: true
+    ));
+    if(result['signout']) {
+      await signOut();
+      await _initialize();
+    }
     _updateUser();
   }
 
