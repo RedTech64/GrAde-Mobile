@@ -46,7 +46,7 @@ class GPACalculatorState extends State<GPACalculator> {
     DocumentReference docRef = Firestore.instance.collection('users').document(_userID);
     DocumentSnapshot data = await docRef.get();
     if(!data.exists || data['classes'] == null) {
-      await docRef.setData({
+      await docRef.updateData({
         'classes': true,
       });
       return true;
