@@ -69,17 +69,16 @@ Future<SignInData> signInWithGoogle(bool silently) async {
 Future<SignInData> signInAnonymously() async {
   user = await _auth.signInAnonymously();
   userID = user.uid.toString();
-  print("UID: "+user.uid.toString());
+  String uid = user.uid.toString();
   setupAnalytics(userID);
   await setupData(user.uid.toString());
   await setupFRC();
   initFCM();
-  return new SignInData(user.uid, simpleFAB, true);
+  return new SignInData(uid, simpleFAB, true);
 }
 
 Future<void> signOut() async {
   print(_googleSignIn.currentUser);
-  //await _googleSignIn.signOut();
   await _googleSignIn.disconnect();
   user = null;
   googleUser = null;
@@ -98,7 +97,7 @@ Future setupData(id) async {
     } else {
       simpleFAB = userDoc.data['simpleFAB'];
     }
-    if(!user.isAnonymous) {
+    if(googleUser != null) {
       await userDocRef.updateData({
         'name': googleUser.displayName,
         'email': googleUser.email,
@@ -115,7 +114,7 @@ Future setupData(id) async {
       'mobile': true,
       'simpleFAB': false,
     });
-    if(!user.isAnonymous) {
+    if(googleUser != null) {
       await userDocRef.updateData({
         'name': googleUser.displayName,
         'email': googleUser.email,

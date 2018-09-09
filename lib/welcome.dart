@@ -16,7 +16,8 @@ class Welcome extends StatefulWidget {
 }
 
 class WelcomeState extends State<Welcome> {
-  bool _tapped = false;
+  bool _tappedGoogle = false;
+  bool _tappedAnonymous = false;
 
   @override
   void initState() {
@@ -67,7 +68,7 @@ class WelcomeState extends State<Welcome> {
             new SizedBox(
               height: 20.0,
             ),
-            _tapped ? new CircularProgressIndicator() :
+            _tappedGoogle ? new CircularProgressIndicator() :
             new RaisedButton(
               child: new Text(
                 'SIGN IN WITH GOOGLE',
@@ -78,7 +79,7 @@ class WelcomeState extends State<Welcome> {
               color: Colors.redAccent,
               onPressed: () {
                 setState(() {
-                  _tapped = true;
+                  _tappedGoogle = true;
                 });
                 signOut();
                 signInWithGoogle(false).then((data) {
@@ -86,7 +87,7 @@ class WelcomeState extends State<Welcome> {
                     Navigator.pop(context,new WelcomePageData(data.uid, data.simpleFAB));
                   } else {
                     setState(() {
-                      _tapped = false;
+                      _tappedGoogle = false;
                     });
                   }
                 });
@@ -95,19 +96,30 @@ class WelcomeState extends State<Welcome> {
             new SizedBox(
               height: 5.0,
             ),
+            _tappedAnonymous ? new SizedBox(
+              height: 5.0,
+            ) : new Container(),
+            _tappedAnonymous ? new CircularProgressIndicator() :
             Platform.isIOS ?
             new FlatButton(
                 child: new Text(
-                  'SIGN IN ANYNOMOUSLY',
+                  'SIGN IN ANONYMOUSLY',
                   style: new TextStyle(
                     fontSize: 16.0,
                   ),
                 ),
                 onPressed: () {
+                  setState(() {
+                    _tappedAnonymous = true;
+                  });
                   signOut();
                   signInAnonymously().then((data) {
                     if(data.signedin) {
                       Navigator.pop(context,new WelcomePageData(data.uid, data.simpleFAB));
+                    } else {
+                      setState(() {
+                        _tappedAnonymous = false;
+                      });
                     }
                   });
                 }
