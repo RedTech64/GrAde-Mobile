@@ -129,7 +129,7 @@ class MainViewState extends State<MainView> {
       await signOut();
       await _initialize();
     }
-    _updateUser();
+    _changePage(_currentIndex);
   }
 
   void _changePage(int index) {

@@ -107,7 +107,12 @@ class SwitchSettingsOptionState extends State<SwitchSettingsOption> {
                   ),
                   new Switch(
                       value: switchValue,
-                      onChanged: (value) {}
+                      onChanged: (value) {
+                        onPressed();
+                        setState(() {
+                          switchValue = !switchValue;
+                        });
+                      },
                   ),
                 ],
               ),
