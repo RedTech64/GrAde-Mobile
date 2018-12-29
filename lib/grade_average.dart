@@ -326,7 +326,7 @@ class GradeAverageState extends State<GradeAverage> {
                               ),
                               new Expanded(
                                   child: new Slider(
-                                  max: 100.0,
+                                  max: 200.0,
                                   min: 0.0,
                                   value: _weightValue,
                                   onChanged: (value) {

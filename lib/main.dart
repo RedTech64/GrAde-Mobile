@@ -125,7 +125,7 @@ class MainViewState extends State<MainView> {
         },
         fullscreenDialog: true
     ));
-    if(result['signout']) {
+    if(result != null && result['signout']) {
       await signOut();
       await _initialize();
     }
@@ -134,6 +134,9 @@ class MainViewState extends State<MainView> {
 
   void _changePage(int index) {
     setState(() {
+      if(simpleFAB == null) {
+        _changePage(index);
+      }
       if(index == 0) {
         _page = gradeAverage;
         _fab = new GradeAverageFAB(new Key(simpleFAB.toString()),simpleFAB);
