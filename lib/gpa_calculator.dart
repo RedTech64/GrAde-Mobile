@@ -115,9 +115,11 @@ class GPACalculatorState extends State<GPACalculator> {
     DocumentSnapshot averageData = await userData.collection('averages').document(averageID).get();
     var categories = averageData.data['categories'];
     var grade = gradeAverageState.getOverallGrade(categories);
-    await userData.collection('classes').document(classID).updateData({
-      'grade': grade.toInt(),
-    });
+    DocumentSnapshot c = await userData.collection('classes').document(classID).get();
+    if(c.data['linkID'] != "")
+      await userData.collection('classes').document(classID).updateData({
+        'grade': grade.toInt(),
+      });
   }
 
   @override
