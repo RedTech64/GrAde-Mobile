@@ -8,7 +8,7 @@ import 'loading.dart';
 import 'dart:async';
 import 'thin_divider.dart';
 import 'utils/analytics.dart';
-import 'utils/auth.dart';
+import 'package:flutter/services.dart';
 
 bool averageLoaded = false;
 GradeAverageState gradeAverageState;
@@ -27,19 +27,23 @@ class GradeAverage extends StatefulWidget {
 
 class GradeAverageState extends State<GradeAverage> {
   String _userID;
-  var _gradeValue = 100.0;
-  var _weightValue = 100.0;
+  int _gradeValue = 100;
+  int _weightValue = 100;
   String _selectedAverage;
   int _selectedCategory = 0;
   var _categories = [];
   bool dataExists = false;
   int quickUpdate = 0;
   DocumentReference userData;
+  TextEditingController gradeController;
+  TextEditingController weightController;
 
   GradeAverageState(this._userID);
   
   @override
   void initState() {
+    gradeController = new TextEditingController(text: _gradeValue.toString());
+    weightController = new TextEditingController(text: _weightValue.toString());
     var data = false;
     _setupData().then((result) {
       data = result;
@@ -280,63 +284,74 @@ class GradeAverageState extends State<GradeAverage> {
                         ),
                         new ThinDivider(),
                         new Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
                           child: new Text(
                             _getGradeDisplay(),
                             style: new TextStyle(
-                              fontSize: 20.0
+                              fontSize: 16,
                             ),
                           ),
                         ),
-                        new Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
-                          child: new Row(
-                            children: <Widget>[
-                              new Text(
-                                ' Points:',
-                                style: new TextStyle(
-                                  fontSize: 16.0,
-                                ),
-                              ),
-                              new Expanded(
-                                  child: new Slider(
-                                  max: 100.0,
-                                  min: 0.0,
-                                  value: _gradeValue,
-                                  onChanged: (value) {
+                        new Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new Container(
+                              height: 60,
+                              width: 80,
+                              child: new Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                child: new TextField(
+                                  controller: gradeController,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [new WhitelistingTextInputFormatter(new RegExp("[0-9]"))],
+                                  decoration: new InputDecoration(
+                                    border: OutlineInputBorder(borderRadius: new BorderRadius.circular(10.0)),
+                                  ),
+                                  onChanged: (text) {
                                     setState(() {
-                                      _gradeValue = value;                                
+                                      _gradeValue = int.parse(text);
+                                    });
+                                  },
+                                  onTap: () {
+                                    setState(() {
+                                      gradeController.selection = new TextSelection(baseOffset: 0, extentOffset: gradeController.text.length);
                                     });
                                   },
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        new Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: new Row(
-                            children: <Widget>[
-                              new Text(
-                                'Weight:',
-                                style: new TextStyle(
-                                  fontSize: 16.0,
-                                ),
+                            ),
+                            new Text(
+                              "/",
+                              style: new TextStyle(
+                                fontSize: 32,
                               ),
-                              new Expanded(
-                                  child: new Slider(
-                                  max: 200.0,
-                                  min: 0.0,
-                                  value: _weightValue,
-                                  onChanged: (value) {
+                            ),
+                            new Container(
+                              height: 60,
+                              width: 80,
+                              child: new Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                child: new TextField(
+                                  controller: weightController,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [new WhitelistingTextInputFormatter(new RegExp("[0-9]"))],
+                                  decoration: new InputDecoration(
+                                    border: OutlineInputBorder(borderRadius: new BorderRadius.circular(10.0)),
+                                  ),
+                                  onChanged: (text) {
                                     setState(() {
-                                      _weightValue = value;                                
+                                      _gradeValue = int.parse(text);
+                                    });
+                                  },
+                                  onTap: () {
+                                    setState(() {
+                                      weightController.selection = new TextSelection(baseOffset: 0, extentOffset: weightController.text.length);
                                     });
                                   },
                                 ),
-                              )
-                            ],
-                          ),
+                              ),
+                            ),
+                          ],
                         ),
                         new ThinDivider(),
                         new Padding(
@@ -387,7 +402,7 @@ class GradeAverageState extends State<GradeAverage> {
 
   String _getGradeDisplay() {
     if(_weightValue.floor() != 0) {
-      return '${_gradeValue.floor().toString()}/${_weightValue.floor().toString()} (${((_gradeValue.floor()/_weightValue.floor())*100).floor()}%)';
+      return '(${((_gradeValue.floor()/_weightValue.floor())*100).floor()}%)';
     } else {
       return '${_gradeValue.floor().toString()}/${_weightValue.floor().toString()} (EC)';
     }
