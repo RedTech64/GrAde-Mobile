@@ -91,22 +91,20 @@ class GPACalculatorState extends State<GPACalculator> {
 
   List<Widget> _buildClasses(classes) {
     var list = <Widget>[];
+    num gpa = _getGPA(classes);
     for(var i = 0; i < classes.length; i++) {
       var id = classes[i].data['id'];
       var name = classes[i].data['name'];
       var grade = classes[i].data['grade'];
       var qp = classes[i].data['qp'];
       var linkID = classes[i].data['linkID'];
-      if(grade == null) {
-        grade = 0;
-      }
-      if(qp == null) {
-        qp = 0;
-      }
-      if(linkID != "") {
-        _updateLinkedData(classes[i]['id'],classes[i]['linkID']);
-      }
-      list.add(new Class(id,name,grade,qp,new LinkData(classes[i]['linkID'],classes[i]['linkName'])));
+      var color;
+      if(grade == null) grade = 0;
+      if(qp == null) qp = 0;
+      if(linkID != "") _updateLinkedData(classes[i]['id'],classes[i]['linkID']);
+      if(grade+qp < gpa) color = Colors.red;
+      else color = Colors.green;
+      list.add(new Class(id,name,grade,qp,color,new LinkData(classes[i]['linkID'],classes[i]['linkName'])));
     }
     return list;
   }

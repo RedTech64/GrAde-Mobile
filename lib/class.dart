@@ -19,9 +19,10 @@ class Class extends StatelessWidget {
   final String _name;
   final int _grade;
   final int _qp;
+  final Color color;
   final LinkData _linkData;
 
-  Class(this._id,this._name,this._grade,this._qp,this._linkData);
+  Class(this._id,this._name,this._grade,this._qp,this.color,this._linkData);
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +50,7 @@ class Class extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: new TextStyle(
                     fontSize: 20.0,
+                    color: color,
                   ),
                 ),
               ),
