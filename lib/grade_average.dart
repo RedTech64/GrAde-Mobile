@@ -91,22 +91,21 @@ class GradeAverageState extends State<GradeAverage> {
     });
   }
 
-  void addGrade() {
-    var grade = _gradeValue.floor().toInt();
-    var weight = _weightValue.floor().toInt();
+  void addGrade(int categoryIndex,int grade,int weight) {
     setState(() {
-      var grades = fixArray(_categories[_selectedCategory]['grades']);
+      var grades = fixArray(_categories[categoryIndex]['grades']);
       grades.add({
         'grade': grade,
         'weight': weight
       });
       quickUpdate = 2;
-      _categories[_selectedCategory]['grades'] = grades;
+      _categories[categoryIndex]['grades'] = grades;
     });
     sendGradeAddEvent(grade, weight);
   }
 
   void deleteGrade(int categoryIndex,int gradeIndex) {
+    print(categoryIndex.toString()+" "+gradeIndex.toString());
     var grade = _categories[categoryIndex]['grades'][gradeIndex]['grade'];
     var weight = _categories[categoryIndex]['grades'][gradeIndex]['weight'];
     setState(() {
@@ -359,7 +358,10 @@ class GradeAverageState extends State<GradeAverage> {
                             color: Colors.blue,
                             shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
                             onPressed: () {
-                              addGrade();
+                              addGrade(_selectedCategory,_gradeValue.floor().toInt(),_weightValue.floor().toInt());
+                              setState(() {
+                                gradeController.selection = new TextSelection(baseOffset: 0, extentOffset: gradeController.text.length);
+                              });
                             },
                           ),
                         ),

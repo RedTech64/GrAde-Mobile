@@ -21,16 +21,26 @@ class CategoryCard extends StatelessWidget {
       } else {
         _text = _grade.toString();
       }
-      list.add(new Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: new InputChip(
-          label: new Text(_text),
-          deleteIcon: new Icon(Icons.cancel),
-          onPressed: () {
-          },
-          onDeleted: () {
-            gradeAverageState.deleteGrade(_category.index, i);
-          },
+      list.add(new Draggable<ChipDraggableData>(
+        data: new ChipDraggableData(
+          categoryIndex: _category.index,
+          index: i,
+          grade: _grade,
+          weight: _weight
+        ),
+        childWhenDragging: new Container(height: 0,width: 0,),
+        feedback: new Material(child: new Chip(label: new Text(_text))),
+        child: new Padding(
+          padding: const EdgeInsets.fromLTRB(2.0,0,2.0,0),
+          child: new InputChip(
+            label: new Text(_text),
+            deleteIcon: new Icon(Icons.cancel),
+            onPressed: () {
+            },
+            onDeleted: () {
+              gradeAverageState.deleteGrade(_category.index, i);
+            },
+          ),
         ),
       ));
     }
@@ -59,47 +69,72 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Card(
-      child: new Column(
-        children: <Widget>[
-          new Row(
+      child: new DragTarget<ChipDraggableData>(
+        builder: (context, candidateData, rejectedData) {
+          return new Column(
             children: <Widget>[
+              new Row(
+                children: <Widget>[
+                  new Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: new SizedBox(
+                      height: 32.0,
+                      width: 32.0,
+                      child: new SizedBox(
+                        height: 24.0,
+                        width: 24.0,
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    child: new Text(
+                      _category.name,
+                      textAlign: TextAlign.center,
+                      style: new TextStyle(
+                        fontSize: 24.0,
+                      ),
+                    ),
+                  ),
+                  new IconButton(
+                    icon: new Icon(Icons.edit),
+                    onPressed: () {
+                      _openEditCategoryDialog(context);
+                    },
+                  )
+                ],
+              ),
+              new ThinDivider(),
               new Padding(
-                padding: EdgeInsets.all(8.0),
-                child: new SizedBox(
-                  height: 32.0,
-                  width: 32.0,
-                  child: new SizedBox(
-                    height: 24.0,
-                    width: 24.0,
-                  ),
+                padding: const EdgeInsets.all(6.0),
+                child: new Wrap(
+                children: _buildChips(_grades),
                 ),
               ),
-              new Expanded(
-                child: new Text(
-                  _category.name,
-                  textAlign: TextAlign.center,
-                  style: new TextStyle(
-                    fontSize: 24.0,
-                  ),
-                ),
-              ),
-              new IconButton(
-                  icon: new Icon(Icons.edit),
-                  onPressed: () {
-                    _openEditCategoryDialog(context);
-                  },
-              )
             ],
-          ),
-          new ThinDivider(),
-          new Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: new Wrap(
-              children: _buildChips(_grades),
-            ),
-          )
-        ],
+          );
+        },
+        onWillAccept: (data) {
+          print("owa");
+          return true;
+        },
+        onAccept: (data) {
+          print("add");
+          gradeAverageState.deleteGrade(data.categoryIndex, data.index);
+          gradeAverageState.addGrade(_category.index,data.grade,data.weight);
+        },
+        onLeave: (data) {
+          print("leave");
+        },
       ),
     );
   }
+}
+
+class ChipDraggableData {
+  int categoryIndex;
+  int index;
+  int grade;
+  int weight;
+
+  ChipDraggableData({this.categoryIndex,this.index,this.grade,this.weight});
 }
