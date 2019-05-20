@@ -9,6 +9,7 @@ import 'dart:async';
 import 'thin_divider.dart';
 import 'utils/analytics.dart';
 import 'package:flutter/services.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 bool averageLoaded = false;
 GradeAverageState gradeAverageState;
@@ -37,11 +38,20 @@ class GradeAverageState extends State<GradeAverage> {
   DocumentReference userData;
   TextEditingController gradeController;
   TextEditingController weightController;
+  bool keyboard = false;
 
   GradeAverageState(this._userID);
   
   @override
   void initState() {
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (visible) {
+        keyboard = visible;
+        if(!visible) {
+          FocusScope.of(context).requestFocus(new FocusNode());
+        }
+      }
+    );
     gradeController = new TextEditingController(text: _gradeValue.toString());
     weightController = new TextEditingController(text: _weightValue.toString());
     var data = false;
@@ -109,7 +119,6 @@ class GradeAverageState extends State<GradeAverage> {
   }
 
   void deleteGrade(int categoryIndex,int gradeIndex) {
-    print(categoryIndex.toString()+" "+gradeIndex.toString());
     var grade = _categories[categoryIndex]['grades'][gradeIndex]['grade'];
     var weight = _categories[categoryIndex]['grades'][gradeIndex]['weight'];
     setState(() {
@@ -308,6 +317,7 @@ class GradeAverageState extends State<GradeAverage> {
                                     border: OutlineInputBorder(borderRadius: new BorderRadius.circular(10.0)),
                                   ),
                                   onChanged: (text) {
+                                    if(text == "") text = "0";
                                     setState(() {
                                       _gradeValue = int.parse(text);
                                     });
@@ -339,8 +349,9 @@ class GradeAverageState extends State<GradeAverage> {
                                     border: OutlineInputBorder(borderRadius: new BorderRadius.circular(10.0)),
                                   ),
                                   onChanged: (text) {
+                                    if(text == "") text = "0";
                                     setState(() {
-                                      _gradeValue = int.parse(text);
+                                      _weightValue = int.parse(text);
                                     });
                                   },
                                   onTap: () {
@@ -355,14 +366,14 @@ class GradeAverageState extends State<GradeAverage> {
                         ),
                         new ThinDivider(),
                         new Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(2.0),
                           child: new Wrap(
                             children: _buildCategoryChips(_categories),
                           ),
                         ),
                         new ThinDivider(),
                         new Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(4.0),
                           child: new RaisedButton(
                             child: new Text(
                               'ADD',
@@ -375,7 +386,9 @@ class GradeAverageState extends State<GradeAverage> {
                             onPressed: () {
                               addGrade(_selectedCategory,_gradeValue.floor().toInt(),_weightValue.floor().toInt());
                               setState(() {
-                                gradeController.selection = new TextSelection(baseOffset: 0, extentOffset: gradeController.text.length);
+                                print(keyboard);
+                                if(keyboard)
+                                  gradeController.selection = new TextSelection(baseOffset: 0, extentOffset: gradeController.text.length);
                               });
                             },
                           ),
