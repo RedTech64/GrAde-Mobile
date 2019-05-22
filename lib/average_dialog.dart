@@ -2,6 +2,8 @@ import 'loading.dart';
 import 'package:flutter/material.dart';
 import 'grade_average.dart';
 import 'dart:async';
+import 'utils/data_provider.dart';
+import 'package:provider/provider.dart';
 
 class AverageDialog extends StatelessWidget {
   final bool add;
@@ -9,7 +11,8 @@ class AverageDialog extends StatelessWidget {
   AverageDialog(this.add);
 
   Future<List<Widget>> _buildAverageElements(context) async {
-    List averages = await gradeAverageState.getAverages();
+    final userDataState = Provider.of<UserDataState>(context);
+    List averages = await getAverages(userDataState.getUserData);
     var list = <Widget>[];
     for(var i = 0; i < averages.length; i++) {
       list.add(new SimpleDialogOption(

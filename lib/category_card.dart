@@ -3,6 +3,8 @@ import 'grade_average.dart';
 import 'category_dialoge.dart';
 import 'dart:async';
 import 'thin_divider.dart';
+import 'utils/data_provider.dart';
+import 'package:provider/provider.dart';
 
 class CategoryCard extends StatelessWidget {
   final Category _category;
@@ -10,7 +12,7 @@ class CategoryCard extends StatelessWidget {
 
   CategoryCard(this._category,this._grades);
 
-  List<Widget> _buildChips(_grades) {
+  List<Widget> _buildChips(averageState,_grades) {
     var list = <Widget>[];
     for(var i = 0; i < _grades.length; i++) {
       int _grade = _grades[i]['grade'];
@@ -38,7 +40,7 @@ class CategoryCard extends StatelessWidget {
             onPressed: () {
             },
             onDeleted: () {
-              gradeAverageState.deleteGrade(_category.index, i);
+              averageState.deleteGrade(_category.index, i);
             },
           ),
         ),
@@ -50,7 +52,7 @@ class CategoryCard extends StatelessWidget {
     return list;
   }
 
-  Future _openEditCategoryDialog(context) async {
+  Future _openEditCategoryDialog(averageState,context) async {
     CategoryDialogData category = await Navigator.of(context).push(new MaterialPageRoute<CategoryDialogData>(
       builder: (BuildContext context) {
         return new CategoryDialog(new Category(this._category.name, this._category.weight, this._category.index),true);
@@ -59,15 +61,16 @@ class CategoryCard extends StatelessWidget {
     ));
     if(category != null) {
       if(category.delete) {
-        gradeAverageState.deleteCategory(new Category(category.name, category.weight, category.index));
+        averageState.deleteCategory(new Category(category.name, category.weight, category.index));
       } else {
-        gradeAverageState.editCategory(new Category(category.name, category.weight, category.index));
+        averageState.editCategory(new Category(category.name, category.weight, category.index));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final averageState = Provider.of<AverageState>(context);
     return new Card(
       child: new DragTarget<ChipDraggableData>(
         builder: (context, candidateData, rejectedData) {
@@ -98,7 +101,7 @@ class CategoryCard extends StatelessWidget {
                   new IconButton(
                     icon: new Icon(Icons.edit),
                     onPressed: () {
-                      _openEditCategoryDialog(context);
+                      _openEditCategoryDialog(averageState,context);
                     },
                   )
                 ],
@@ -107,7 +110,7 @@ class CategoryCard extends StatelessWidget {
               new Padding(
                 padding: const EdgeInsets.all(6.0),
                 child: new Wrap(
-                children: _buildChips(_grades),
+                children: _buildChips(averageState,_grades),
                 ),
               ),
             ],
@@ -119,8 +122,8 @@ class CategoryCard extends StatelessWidget {
         },
         onAccept: (data) {
           print("add");
-          gradeAverageState.deleteGrade(data.categoryIndex, data.index);
-          gradeAverageState.addGrade(_category.index,data.grade,data.weight);
+          averageState.deleteGrade(data.categoryIndex, data.index);
+          averageState.addGrade(_category.index,data.grade,data.weight);
         },
         onLeave: (data) {
           print("leave");

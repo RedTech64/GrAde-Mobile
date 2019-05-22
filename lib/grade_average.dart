@@ -10,9 +10,10 @@ import 'thin_divider.dart';
 import 'utils/analytics.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:provider/provider.dart';
+import 'utils/data_provider.dart';
 
 bool averageLoaded = false;
-GradeAverageState gradeAverageState;
 
 class GradeAverage extends StatefulWidget {
   final String _userID;
@@ -20,10 +21,7 @@ class GradeAverage extends StatefulWidget {
   GradeAverage(Key key,this._userID) : super(key: key);
   
   @override
-  State createState() {
-    gradeAverageState = new GradeAverageState(_userID);
-    return gradeAverageState;
-  }
+  State createState() => new GradeAverageState(_userID);
 }
 
 class GradeAverageState extends State<GradeAverage> {
@@ -66,104 +64,6 @@ class GradeAverageState extends State<GradeAverage> {
       });
     });
     super.initState();
-  }
-
-  void addAverage(name) async {
-    DocumentReference averageDoc = await userData.collection('averages').add({'selectedCategory': 0});
-    var id = averageDoc.documentID;
-    averageDoc.updateData({
-      'id': id,
-      'name': name,
-      'categories': [{
-        'name': "Category 1",
-        'weight': 100,
-        'grades': [],
-      }]
-    });
-    userData.updateData({'selectedAverage': id});
-    setState(() {
-      _selectedAverage = id;
-    });
-    sendAverageAddEvent(name);
-  }
-
-  void updateAverage(name) {
-    userData.collection('averages').document(_selectedAverage).updateData({'name': name});
-    sendAverageEditEvent(name);
-  }
-
-  void deleteAverage(String averageID) async {
-    DocumentSnapshot data = await userData.collection('averages').document(averageID).get();
-    String name = data.data['name'];
-    sendAverageDeleteEvent(name);
-    await userData.collection('averages').document(averageID).delete();
-    QuerySnapshot docs = await userData.collection('averages').limit(1).getDocuments();
-    DocumentSnapshot firstDoc = docs.documents[0];
-    userData.updateData({'selectedAverage': firstDoc.documentID});
-    setState(() {
-      _selectedAverage = firstDoc.documentID;
-    });
-  }
-
-  void addGrade(int categoryIndex,int grade,int weight) {
-    setState(() {
-      var grades = fixArray(_categories[categoryIndex]['grades']);
-      grades.add({
-        'grade': grade,
-        'weight': weight
-      });
-      quickUpdate = 2;
-      _categories[categoryIndex]['grades'] = grades;
-    });
-    sendGradeAddEvent(grade, weight);
-  }
-
-  void deleteGrade(int categoryIndex,int gradeIndex) {
-    var grade = _categories[categoryIndex]['grades'][gradeIndex]['grade'];
-    var weight = _categories[categoryIndex]['grades'][gradeIndex]['weight'];
-    setState(() {
-      var grades = fixArray(_categories[categoryIndex]['grades']);
-      grades.removeAt(gradeIndex);
-      quickUpdate = 2;
-      _categories[categoryIndex]['grades'] = grades;
-    });
-    sendGradeDeleteEvent(grade, weight);
-  }
-
-  void addCategory(Category category) {
-    List categories = fixArray(_categories);
-    categories.add({
-      'name': category.name,
-      'weight': category.weight,
-      'grades': []
-    });
-    setState(() {
-      _categories = categories;
-      quickUpdate = 2;
-    });
-    sendCategoryAddEvent(category.name, category.weight);
-  }
-
-  void editCategory(Category category) {
-    setState(() {
-      _categories[category.index] = {
-        'name': category.name,
-        'weight': category.weight,
-        'grades': _categories[category.index]['grades']
-      };
-      quickUpdate = 2;
-    });
-    sendCategoryEditEvent(category.name, category.weight);
-  }
-
-  void deleteCategory(Category category) {
-    List categories = fixArray(_categories);
-    categories.removeAt(category.index);
-    setState(() {
-      _categories = categories;
-      quickUpdate = 2;
-    });
-    sendCategoryDeleteEvent(category.name, category.weight);
   }
 
   Future<bool> _setupData() async {
@@ -231,6 +131,12 @@ class GradeAverageState extends State<GradeAverage> {
 
   @override
   Widget build(BuildContext context) {
+    final averageState = Provider.of<AverageState>(context);
+    quickUpdate = averageState.getQU();
+    if(averageState.getSelectedAverage() == null && _selectedAverage != null)
+      averageState.setSelectedAverage(_selectedAverage,false);
+    else
+      _selectedAverage = averageState.getSelectedAverage();
     if(_userID == null) return new Loading();
     return new StreamBuilder(
       stream: Firestore.instance.collection('users').document(_userID).collection('averages').document(_selectedAverage).snapshots(),
@@ -239,6 +145,7 @@ class GradeAverageState extends State<GradeAverage> {
         averageLoaded = true;
         if(quickUpdate == 0) {
           _categories = snapshot.data['categories'];
+          averageState.setCategories(_categories, false);
         }
         if(quickUpdate != 0) quickUpdate--;
         if(quickUpdate == 1) _uploadCategories();
@@ -273,7 +180,7 @@ class GradeAverageState extends State<GradeAverage> {
                         new Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: new Column(
-                            children: _categories.map((category) => new CategoryGrade(category['name'], _getCategoryGrade(category['grades']))).toList(),
+                            children: _categories.map((category) => new CategoryGrade(category['name'], getCategoryGrade(category['grades']))).toList(),
                           ),
                         ),
                       ],
@@ -384,7 +291,7 @@ class GradeAverageState extends State<GradeAverage> {
                             color: Colors.blue,
                             shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
                             onPressed: () {
-                              addGrade(_selectedCategory,_gradeValue.floor().toInt(),_weightValue.floor().toInt());
+                              averageState.addGrade(_selectedCategory,_gradeValue.floor().toInt(),_weightValue.floor().toInt());
                               setState(() {
                                 print(keyboard);
                                 if(keyboard)
@@ -408,11 +315,6 @@ class GradeAverageState extends State<GradeAverage> {
     );
   }
 
-  Future<List> getAverages() async {
-    var docs = await userData.collection('averages').getDocuments();
-    return docs.documents;
-  }
-
   String _getGradeDisplay() {
     if(_weightValue.floor() != 0) {
       return '(${((_gradeValue.floor()/_weightValue.floor())*100).floor()}%)';
@@ -421,34 +323,11 @@ class GradeAverageState extends State<GradeAverage> {
     }
   }
 
-  double _getCategoryGrade(grades) {
-    var top = 0;
-    var bottom = 0;
-    for (var j = 0; j < grades.length; j++) {
-      top += grades[j]['grade'];
-      bottom += grades[j]['weight'];
-    }
-    var sum = (top / bottom) * 100;
-    if(sum.isNaN) {
-      return 0.0;
-    } else {
-      return sum;
-    }
-  }
-
-  double getOverallGrade(categories) {
-    double sum = 0.0;
-    for(var i = 0; i < categories.length; i++) {
-      sum += _getCategoryGrade(categories[i]['grades'])*(categories[i]['weight']/100);
-    }
-    return sum;
-  }
-
   String getSelectedAverage() {
     return _selectedAverage;
   }
 
-  Future openAverageEditDialog(context) async {
+  Future openAverageEditDialog(averageState,context) async {
     var result;
     var averages = await userData.collection('averages').document(_selectedAverage).get();
     if(averageLoaded) {
@@ -458,15 +337,15 @@ class GradeAverageState extends State<GradeAverage> {
       );
       if(result != null) {
         if(result['delete']) {
-          gradeAverageState.deleteAverage(gradeAverageState.getSelectedAverage());
+          averageState.deleteAverage(averageState.getSelectedAverage());
         } else {
-          gradeAverageState.updateAverage(result['name']);
+          averageState.updateAverage(result['name']);
         }
       }
     }
   }
 
-  Future openAverageDialog(context) async {
+  Future openAverageDialog(averageState,context) async {
     var result;
     var addResult;
     QuerySnapshot averageDocs = await userData.collection('averages').getDocuments();
@@ -485,7 +364,7 @@ class GradeAverageState extends State<GradeAverage> {
           builder: (BuildContext context) => new AverageEditDialog("New Average",true),
         );
         if(addResult != null) {
-          addAverage(addResult['name']);
+          averageState.addAverage(addResult['name']);
         }
       } else if(result != null) {
         userData.updateData({
@@ -524,13 +403,14 @@ class GradeAverageFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final averageState = Provider.of<AverageState>(context);
     if(!simple) {
       return new FloatingActionButton.extended(
         heroTag: "btn1",
         label: new Text('Add Category'),
         icon: new Icon(Icons.add_box),
         onPressed: () {
-          if(average) openCreateCategoryDialog(context);
+          if(average) openCreateCategoryDialog(averageState,context);
         },
       );
     } else {
@@ -538,14 +418,14 @@ class GradeAverageFAB extends StatelessWidget {
         heroTag: "btn2",
         child: new Icon(Icons.add),
         onPressed: () {
-          if(average) openCreateCategoryDialog(context);
+          if(average) openCreateCategoryDialog(averageState,context);
         },
       );
     }
   }
 }
 
-Future openCreateCategoryDialog(context) async {
+Future openCreateCategoryDialog(averageState,context) async {
   CategoryDialogData category = await Navigator.of(context).push(new MaterialPageRoute<CategoryDialogData>(
     builder: (BuildContext context) {
       return new CategoryDialog(new Category("", 100, -1),false);
@@ -553,6 +433,34 @@ Future openCreateCategoryDialog(context) async {
     fullscreenDialog: true
   ));
   if(category != null) {
-    gradeAverageState.addCategory(new Category(category.name, category.weight, -1));
+    averageState.addCategory(new Category(category.name, category.weight, -1));
   }
+}
+
+Future<List> getAverages(userData) async {
+  var docs = await userData.collection('averages').getDocuments();
+  return docs.documents;
+}
+
+double getCategoryGrade(grades) {
+  var top = 0;
+  var bottom = 0;
+  for (var j = 0; j < grades.length; j++) {
+    top += grades[j]['grade'];
+    bottom += grades[j]['weight'];
+  }
+  var sum = (top / bottom) * 100;
+  if(sum.isNaN) {
+    return 0.0;
+  } else {
+    return sum;
+  }
+}
+
+double getOverallGrade(categories) {
+  double sum = 0.0;
+  for(var i = 0; i < categories.length; i++) {
+    sum += getCategoryGrade(categories[i]['grades'])*(categories[i]['weight']/100);
+  }
+  return sum;
 }

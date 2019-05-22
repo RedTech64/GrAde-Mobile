@@ -8,6 +8,9 @@ import 'loading.dart';
 import 'welcome.dart';
 import 'utils/analytics.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
+import 'utils/data_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 double version = 0.5;
 bool average = true;
@@ -41,18 +44,18 @@ class MainViewState extends State<MainView> {
   GradeAverage gradeAverage;
   GPACalculator gpaCalculator;
   Widget _page = new Loading();
-  Widget _fab = GradeAverageFAB(new Key("true"),true);
+  Widget _fab = GradeAverageFAB(new Key("true"), true);
   int _currentIndex = 0;
   int keyCount = 0;
+  DocumentReference userData;
 
   @override
   void initState() {
     super.initState();
     signInWithGoogle(true).then((data) {
       print(data.uid);
-      if(data.signedin) {
-        gradeAverage =  new GradeAverage(new Key(data.uid), data.uid);
-        gpaCalculator = new GPACalculator(new Key(data.uid), data.uid);
+      if (data.signedin) {
+        _setUpPages(data);
         _changePage(0);
       } else {
         _initialize();
@@ -61,20 +64,26 @@ class MainViewState extends State<MainView> {
   }
 
   Future _initialize() async {
-    WelcomePageData data = await Navigator.of(context).push(new MaterialPageRoute<WelcomePageData>(
-        builder: (BuildContext context) {
-          return new Welcome();
-        },
-        fullscreenDialog: true
-    ));
-    if(data.uid == null) {
+    WelcomePageData data = await Navigator.of(context).push(
+        new MaterialPageRoute<WelcomePageData>(
+            builder: (BuildContext context) {
+              return new Welcome();
+            },
+            fullscreenDialog: true
+        ));
+    if (data.uid == null) {
       await _initialize();
     }
-    gradeAverage =  new GradeAverage(new Key(data.uid), data.uid);
-    gpaCalculator = new GPACalculator(new Key(data.uid), data.uid);
+    _setUpPages(data);
     userID = data.uid;
     simpleFAB = data.simpleFAB;
     _changePage(0);
+  }
+
+  void _setUpPages(data) {
+    userData = Firestore.instance.collection('users').document(data.uid);
+    gradeAverage = new GradeAverage(new Key(data.uid), data.uid);
+    gpaCalculator = new GPACalculator(new Key(data.uid), data.uid);
   }
 
   @override
@@ -87,33 +96,44 @@ class MainViewState extends State<MainView> {
           average ? new IconButton(
             icon: new Icon(Icons.edit),
             onPressed: () {
-              gradeAverageState.openAverageEditDialog(context);
+              //gradeAverageState.openAverageEditDialog(context);
             },
           ) : new Container(),
           average ? new IconButton(
             icon: new Icon(Icons.subject),
             onPressed: () {
-              gradeAverageState.openAverageDialog(context);
+              //gradeAverageState.openAverageDialog(context);
             },
           ) : new Container(),
           new IconButton(
-            icon: new Icon(Icons.settings),
-            onPressed: () {
-              openSettings();
-            }),
+              icon: new Icon(Icons.settings),
+              onPressed: () {
+                openSettings();
+              }),
         ],
       ),
-      body: _page,
+      body: ChangeNotifierProvider<UserDataState>(
+        builder: (_) => UserDataState(),
+        child: ChangeNotifierProvider<AverageState>(
+          builder: (_) => AverageState(),
+          child: _page,
+        ),
+      ),
       bottomNavigationBar: new BottomNavigationBar(
-        items: <BottomNavigationBarItem> [
-          new BottomNavigationBarItem(icon: new Icon(Icons.timeline), title: new Text('Average')),
-          new BottomNavigationBarItem(icon: new Icon(Icons.school), title: new Text('GPA')),
+        items: <BottomNavigationBarItem>[
+          new BottomNavigationBarItem(
+              icon: new Icon(Icons.timeline), title: new Text('Average')),
+          new BottomNavigationBarItem(
+              icon: new Icon(Icons.school), title: new Text('GPA')),
         ],
         fixedColor: Colors.red,
         currentIndex: _currentIndex,
         onTap: _changePage,
       ),
-      floatingActionButton: _fab,
+      floatingActionButton: ChangeNotifierProvider<AverageState>(
+        builder: (_) => AverageState(),
+        child: _fab,
+      ),
     );
   }
 
@@ -125,7 +145,7 @@ class MainViewState extends State<MainView> {
         },
         fullscreenDialog: true
     ));
-    if(result != null && result['signout']) {
+    if (result != null && result['signout']) {
       await signOut();
       await _initialize();
     }
@@ -134,35 +154,20 @@ class MainViewState extends State<MainView> {
 
   void _changePage(int index) {
     setState(() {
-      if(simpleFAB == null) {
+      if (simpleFAB == null) {
         _changePage(index);
       }
-      if(index == 0) {
+      if (index == 0) {
         _page = gradeAverage;
-        _fab = new GradeAverageFAB(new Key(simpleFAB.toString()),simpleFAB);
+        _fab = new GradeAverageFAB(new Key(simpleFAB.toString()), simpleFAB);
         _currentIndex = 0;
         average = true;
       } else {
         _page = gpaCalculator;
-        _fab = new GPACalculatorFAB(new Key(simpleFAB.toString()),simpleFAB);
+        _fab = new GPACalculatorFAB(new Key(simpleFAB.toString()), simpleFAB);
         _currentIndex = 1;
         average = false;
       }
-    });
-  }
-
-  void _updateUser() {
-    setState(() {
-      if(_currentIndex == 0) {
-        _page = new GradeAverage(new Key(userID+keyCount.toString()),userID);
-        _fab = new GradeAverageFAB(new Key(simpleFAB.toString()),simpleFAB);
-        average = true;
-      } else {
-        _page = new GPACalculator(new Key(userID+keyCount.toString()), userID);
-        _fab = new GPACalculatorFAB(new Key(simpleFAB.toString()),simpleFAB);
-        average = false;
-      }
-      keyCount = keyCount+1;
     });
   }
 }
