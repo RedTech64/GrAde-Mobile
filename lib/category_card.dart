@@ -21,7 +21,7 @@ class CategoryCard extends StatelessWidget {
       } else {
         _text = _grade.toString();
       }
-      list.add(new Draggable<ChipDraggableData>(
+      list.add(new LongPressDraggable<ChipDraggableData>(
         data: new ChipDraggableData(
           categoryIndex: _category.index,
           index: i,
