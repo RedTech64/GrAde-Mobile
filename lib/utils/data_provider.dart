@@ -7,14 +7,14 @@ import 'analytics.dart';
 class UserDataState with ChangeNotifier {
   UserDataState();
 
-  DocumentReference userData;
+  String userID;
 
-  void setUserData(data) {
-    userData = data;
+  void setID(data) {
+    userID = data;
     notifyListeners();
   }
 
-  DocumentReference get getUserData => userData;
+  String getID() => userID;
 }
 
 class AverageState with ChangeNotifier {
@@ -29,8 +29,15 @@ class AverageState with ChangeNotifier {
     notifyListeners();
   }
 
-  void setSelectedAverage(averageID,notify) {
+  void setSelectedAverage(averageID) {
     _selectedAverage = averageID;
+  }
+
+  void updateSelectedAverage(userData,averageID,notify) {
+    _selectedAverage = averageID;
+    userData.updateData({
+      'selectedAverage': averageID,
+    });
     if(notify) notifyListeners();
   }
 

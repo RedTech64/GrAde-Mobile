@@ -185,7 +185,7 @@ class ClassDialogState extends State<ClassDialog> {
     var result;
     result = await showDialog(
         context: context,
-        builder: (BuildContext context) => new AverageDialog(false)
+        builder: (BuildContext context) => new AverageDialog(userData,false)
     );
     if(result != null) {
       setState(() {

@@ -100,7 +100,6 @@ class WelcomeState extends State<Welcome> {
               height: 5.0,
             ) : new Container(),
             _tappedAnonymous ? new CircularProgressIndicator() :
-            Platform.isIOS ?
             new FlatButton(
                 child: new Text(
                   'SIGN IN ANONYMOUSLY',
@@ -123,7 +122,7 @@ class WelcomeState extends State<Welcome> {
                     }
                   });
                 }
-            ) : new Container(),
+            ),
             new SizedBox(
               height: 6.0,
             ),

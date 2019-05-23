@@ -24,7 +24,10 @@ class GrAdeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'GrAde',
-      home: new MainView(),
+      home: new ChangeNotifierProvider(
+        builder: (_) => AverageState(),
+        child: new MainView(),
+      ),
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder> {
         '/settings': (BuildContext context) => new Settings(),
@@ -45,6 +48,7 @@ class MainViewState extends State<MainView> {
   GPACalculator gpaCalculator;
   Widget _page = new Loading();
   Widget _fab = GradeAverageFAB(new Key("true"), true);
+  Widget _actions = GradeAverageActions(new Key(userID),userID);
   int _currentIndex = 0;
   int keyCount = 0;
   DocumentReference userData;
@@ -81,44 +85,27 @@ class MainViewState extends State<MainView> {
   }
 
   void _setUpPages(data) {
-    userData = Firestore.instance.collection('users').document(data.uid);
     gradeAverage = new GradeAverage(new Key(data.uid), data.uid);
     gpaCalculator = new GPACalculator(new Key(data.uid), data.uid);
   }
 
   @override
   Widget build(BuildContext context) {
+    final averageState = Provider.of<AverageState>(context);
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('GrAde'),
         backgroundColor: Colors.red,
         actions: <Widget>[
-          average ? new IconButton(
-            icon: new Icon(Icons.edit),
-            onPressed: () {
-              //gradeAverageState.openAverageEditDialog(context);
-            },
-          ) : new Container(),
-          average ? new IconButton(
-            icon: new Icon(Icons.subject),
-            onPressed: () {
-              //gradeAverageState.openAverageDialog(context);
-            },
-          ) : new Container(),
           new IconButton(
-              icon: new Icon(Icons.settings),
-              onPressed: () {
-                openSettings();
-              }),
+            icon: new Icon(Icons.settings),
+            onPressed: () {
+              openSettings();
+            }),
+          _actions,
         ],
       ),
-      body: ChangeNotifierProvider<UserDataState>(
-        builder: (_) => UserDataState(),
-        child: ChangeNotifierProvider<AverageState>(
-          builder: (_) => AverageState(),
-          child: _page,
-        ),
-      ),
+      body: _page,
       bottomNavigationBar: new BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           new BottomNavigationBarItem(
@@ -130,10 +117,7 @@ class MainViewState extends State<MainView> {
         currentIndex: _currentIndex,
         onTap: _changePage,
       ),
-      floatingActionButton: ChangeNotifierProvider<AverageState>(
-        builder: (_) => AverageState(),
-        child: _fab,
-      ),
+      floatingActionButton: _fab,
     );
   }
 
@@ -159,11 +143,13 @@ class MainViewState extends State<MainView> {
       }
       if (index == 0) {
         _page = gradeAverage;
+        _actions = new GradeAverageActions(new Key(userID),userID);
         _fab = new GradeAverageFAB(new Key(simpleFAB.toString()), simpleFAB);
         _currentIndex = 0;
         average = true;
       } else {
         _page = gpaCalculator;
+        _actions = new GPACalculatorActions(new Key(userID),userID);
         _fab = new GPACalculatorFAB(new Key(simpleFAB.toString()), simpleFAB);
         _currentIndex = 1;
         average = false;

@@ -19,7 +19,7 @@ class GradeAverage extends StatefulWidget {
   final String _userID;
 
   GradeAverage(Key key,this._userID) : super(key: key);
-  
+
   @override
   State createState() => new GradeAverageState(_userID);
 }
@@ -39,16 +39,16 @@ class GradeAverageState extends State<GradeAverage> {
   bool keyboard = false;
 
   GradeAverageState(this._userID);
-  
+
   @override
   void initState() {
     KeyboardVisibilityNotification().addNewListener(
-      onChange: (visible) {
-        keyboard = visible;
-        if(!visible) {
-          FocusScope.of(context).requestFocus(new FocusNode());
+        onChange: (visible) {
+          keyboard = visible;
+          if(!visible) {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          }
         }
-      }
     );
     gradeController = new TextEditingController(text: _gradeValue.toString());
     weightController = new TextEditingController(text: _weightValue.toString());
@@ -82,6 +82,9 @@ class GradeAverageState extends State<GradeAverage> {
         }],
         'selectedCategory': 0,
       });
+      setState(() {
+        _selectedAverage = averageRef.documentID;
+      });
       await docRef.updateData({'selectedAverage': averageRef.documentID});
       return true;
     } else {
@@ -93,7 +96,7 @@ class GradeAverageState extends State<GradeAverage> {
     var list = <Widget>[];
     for(var i = 0; i < categories.length; i++) {
       list.add(new CategoryCard(
-        new Category(categories[i]['name'],categories[i]['weight'], i), categories[i]['grades']));
+          new Category(categories[i]['name'],categories[i]['weight'], i), categories[i]['grades']));
     }
     return list;
   }
@@ -113,7 +116,7 @@ class GradeAverageState extends State<GradeAverage> {
           onSelected: (selected) {
             if(selected) {
               setState(() {
-                 _selectedCategory = i;           
+                _selectedCategory = i;
               });
             }
           },
@@ -134,184 +137,184 @@ class GradeAverageState extends State<GradeAverage> {
     final averageState = Provider.of<AverageState>(context);
     quickUpdate = averageState.getQU();
     if(averageState.getSelectedAverage() == null && _selectedAverage != null)
-      averageState.setSelectedAverage(_selectedAverage,false);
+      averageState.setSelectedAverage(_selectedAverage);
     else
       _selectedAverage = averageState.getSelectedAverage();
-    if(_userID == null) return new Loading();
+    if(_userID == null || averageState.getSelectedAverage() == null) return new Loading();
     return new StreamBuilder(
-      stream: Firestore.instance.collection('users').document(_userID).collection('averages').document(_selectedAverage).snapshots(),
-      builder: (context, snapshot) {
-        if(!snapshot.hasData || snapshot.data.data == null) return new Loading();
-        averageLoaded = true;
-        if(quickUpdate == 0) {
-          _categories = snapshot.data['categories'];
-          averageState.setCategories(_categories, false);
-        }
-        if(quickUpdate != 0) quickUpdate--;
-        if(quickUpdate == 1) _uploadCategories();
-        return new SingleChildScrollView(
-          child: new Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
-            child: new Center(
-              child: new Column(
-                children: <Widget>[
-                  new Card(
-                    child: new Column(
-                      children: <Widget>[
-                        new Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: new Text(snapshot.data['name'],
-                            style: new TextStyle(
-                              fontSize: 24.0,
-                            ),
-                          ),
-                        ),
-                        new ThinDivider(),
-                        new Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: new Text(
-                            '${getOverallGrade(_categories).toStringAsFixed(2)}%',
-                            style: new TextStyle(
-                              fontSize: 34.0
-                            ),
-                          ),
-                        ),
-                        new ThinDivider(),
-                        new Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: new Column(
-                            children: _categories.map((category) => new CategoryGrade(category['name'], getCategoryGrade(category['grades']))).toList(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  new Card(
-                    child: new Column(
-                      children: <Widget>[
-                        new Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: new Text(
-                            'Add Grades',
-                            style: new TextStyle(
-                              fontSize: 24.0
-                            ),
-                          ),
-                        ),
-                        new ThinDivider(),
-                        new Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
-                          child: new Text(
-                            _getGradeDisplay(),
-                            style: new TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        new Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            new Container(
-                              height: 60,
-                              width: 80,
-                              child: new Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-                                child: new TextField(
-                                  controller: gradeController,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [new WhitelistingTextInputFormatter(new RegExp("[0-9]"))],
-                                  decoration: new InputDecoration(
-                                    border: OutlineInputBorder(borderRadius: new BorderRadius.circular(10.0)),
-                                  ),
-                                  onChanged: (text) {
-                                    if(text == "") text = "0";
-                                    setState(() {
-                                      _gradeValue = int.parse(text);
-                                    });
-                                  },
-                                  onTap: () {
-                                    setState(() {
-                                      gradeController.selection = new TextSelection(baseOffset: 0, extentOffset: gradeController.text.length);
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                            new Text(
-                              "/",
+        stream: Firestore.instance.collection('users').document(_userID).collection('averages').document(averageState.getSelectedAverage()).snapshots(),
+        builder: (context, snapshot) {
+          if(!snapshot.hasData || snapshot.data.data == null) return new Loading();
+          averageLoaded = true;
+          if(quickUpdate == 0) {
+            _categories = snapshot.data['categories'];
+            averageState.setCategories(_categories, false);
+          }
+          if(quickUpdate != 0) quickUpdate--;
+          if(quickUpdate == 1) _uploadCategories();
+          return new SingleChildScrollView(
+            child: new Padding(
+              padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
+              child: new Center(
+                child: new Column(
+                  children: <Widget>[
+                    new Card(
+                      child: new Column(
+                        children: <Widget>[
+                          new Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: new Text(snapshot.data['name'],
                               style: new TextStyle(
-                                fontSize: 32,
+                                fontSize: 24.0,
                               ),
                             ),
-                            new Container(
-                              height: 60,
-                              width: 80,
-                              child: new Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-                                child: new TextField(
-                                  controller: weightController,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [new WhitelistingTextInputFormatter(new RegExp("[0-9]"))],
-                                  decoration: new InputDecoration(
-                                    border: OutlineInputBorder(borderRadius: new BorderRadius.circular(10.0)),
-                                  ),
-                                  onChanged: (text) {
-                                    if(text == "") text = "0";
-                                    setState(() {
-                                      _weightValue = int.parse(text);
-                                    });
-                                  },
-                                  onTap: () {
-                                    setState(() {
-                                      weightController.selection = new TextSelection(baseOffset: 0, extentOffset: weightController.text.length);
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        new ThinDivider(),
-                        new Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: new Wrap(
-                            children: _buildCategoryChips(_categories),
                           ),
-                        ),
-                        new ThinDivider(),
-                        new Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: new RaisedButton(
+                          new ThinDivider(),
+                          new Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: new Text(
-                              'ADD',
+                              '${getOverallGrade(_categories).toStringAsFixed(2)}%',
                               style: new TextStyle(
-                                color: Colors.white
+                                  fontSize: 34.0
                               ),
                             ),
-                            color: Colors.blue,
-                            shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
-                            onPressed: () {
-                              averageState.addGrade(_selectedCategory,_gradeValue.floor().toInt(),_weightValue.floor().toInt());
-                              setState(() {
-                                print(keyboard);
-                                if(keyboard)
-                                  gradeController.selection = new TextSelection(baseOffset: 0, extentOffset: gradeController.text.length);
-                              });
-                            },
                           ),
-                        ),
-                      ],
+                          new ThinDivider(),
+                          new Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: new Column(
+                              children: _categories.map((category) => new CategoryGrade(category['name'], getCategoryGrade(category['grades']))).toList(),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  new Column(
-                    children: _buildCategoryCards(_categories),
-                  ),
-                ],
+                    new Card(
+                      child: new Column(
+                        children: <Widget>[
+                          new Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: new Text(
+                              'Add Grades',
+                              style: new TextStyle(
+                                  fontSize: 24.0
+                              ),
+                            ),
+                          ),
+                          new ThinDivider(),
+                          new Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
+                            child: new Text(
+                              _getGradeDisplay(),
+                              style: new TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          new Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              new Container(
+                                height: 60,
+                                width: 80,
+                                child: new Padding(
+                                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                  child: new TextField(
+                                    controller: gradeController,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [new WhitelistingTextInputFormatter(new RegExp("[0-9]"))],
+                                    decoration: new InputDecoration(
+                                      border: OutlineInputBorder(borderRadius: new BorderRadius.circular(10.0)),
+                                    ),
+                                    onChanged: (text) {
+                                      if(text == "") text = "0";
+                                      setState(() {
+                                        _gradeValue = int.parse(text);
+                                      });
+                                    },
+                                    onTap: () {
+                                      setState(() {
+                                        gradeController.selection = new TextSelection(baseOffset: 0, extentOffset: gradeController.text.length);
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              new Text(
+                                "/",
+                                style: new TextStyle(
+                                  fontSize: 32,
+                                ),
+                              ),
+                              new Container(
+                                height: 60,
+                                width: 80,
+                                child: new Padding(
+                                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                  child: new TextField(
+                                    controller: weightController,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [new WhitelistingTextInputFormatter(new RegExp("[0-9]"))],
+                                    decoration: new InputDecoration(
+                                      border: OutlineInputBorder(borderRadius: new BorderRadius.circular(10.0)),
+                                    ),
+                                    onChanged: (text) {
+                                      if(text == "") text = "0";
+                                      setState(() {
+                                        _weightValue = int.parse(text);
+                                      });
+                                    },
+                                    onTap: () {
+                                      setState(() {
+                                        weightController.selection = new TextSelection(baseOffset: 0, extentOffset: weightController.text.length);
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          new ThinDivider(),
+                          new Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: new Wrap(
+                              children: _buildCategoryChips(_categories),
+                            ),
+                          ),
+                          new ThinDivider(),
+                          new Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: new RaisedButton(
+                              child: new Text(
+                                'ADD',
+                                style: new TextStyle(
+                                    color: Colors.white
+                                ),
+                              ),
+                              color: Colors.blue,
+                              shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+                              onPressed: () {
+                                averageState.addGrade(_selectedCategory,_gradeValue.floor().toInt(),_weightValue.floor().toInt());
+                                setState(() {
+                                  print(keyboard);
+                                  if(keyboard)
+                                    gradeController.selection = new TextSelection(baseOffset: 0, extentOffset: gradeController.text.length);
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    new Column(
+                      children: _buildCategoryCards(_categories),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      }
+          );
+        }
     );
   }
 
@@ -326,54 +329,47 @@ class GradeAverageState extends State<GradeAverage> {
   String getSelectedAverage() {
     return _selectedAverage;
   }
+}
 
-  Future openAverageEditDialog(averageState,context) async {
-    var result;
-    var averages = await userData.collection('averages').document(_selectedAverage).get();
-    if(averageLoaded) {
-      result = await showDialog(
-          context: context,
-          builder: (BuildContext context) => new AverageEditDialog(averages['name'],false)
-      );
-      if(result != null) {
-        if(result['delete']) {
-          averageState.deleteAverage(averageState.getSelectedAverage());
-        } else {
-          averageState.updateAverage(result['name']);
-        }
+Future openAverageEditDialog(AverageState averageState,userID,context) async {
+  var result;
+  DocumentSnapshot main = await Firestore.instance.collection('users').document(userID).get();
+  String selectedAverage = main.data['selectedAverage'];
+  DocumentSnapshot average = await Firestore.instance.collection('users').document(userID).collection('averages').document(selectedAverage).get();
+  if(averageLoaded) {
+    result = await showDialog(
+        context: context,
+        builder: (BuildContext context) => new AverageEditDialog(average.data['name'],false)
+    );
+    if(result != null) {
+      if(result['delete']) {
+        averageState.deleteAverage(Firestore.instance.collection('users').document(userID),averageState.getSelectedAverage());
+      } else {
+        averageState.updateAverage(Firestore.instance.collection('users').document(userID),result['name']);
       }
     }
   }
+}
 
-  Future openAverageDialog(averageState,context) async {
-    var result;
-    var addResult;
-    QuerySnapshot averageDocs = await userData.collection('averages').getDocuments();
-    List averages = [];
-    for(var i = 0; i < averageDocs.documents.length; i++) {
-      averages.add(averageDocs.documents[i].data);
-    }
-    if(averageLoaded) {
-      result = await showDialog(
-          context: context,
-          builder: (BuildContext context) => new AverageDialog(true)
+Future openAverageDialog(AverageState averageState,userID,context) async {
+  var result;
+  var addResult;
+  if(averageLoaded) {
+    result = await showDialog(
+        context: context,
+        builder: (BuildContext context) => new AverageDialog(userID,true)
+    );
+    if(result == -1) {
+      addResult = await showDialog(
+        context: context,
+        builder: (BuildContext context) => new AverageEditDialog("New Average",true),
       );
-      if(result == -1) {
-        addResult = await showDialog(
-          context: context,
-          builder: (BuildContext context) => new AverageEditDialog("New Average",true),
-        );
-        if(addResult != null) {
-          averageState.addAverage(addResult['name']);
-        }
-      } else if(result != null) {
-        userData.updateData({
-          'selectedAverage': result['id']
-        });
-        setState(() {
-          _selectedAverage = result['id'];
-        });
+      if(addResult != null) {
+        averageState.addAverage(Firestore.instance.collection('users').document(userID),addResult['name']);
       }
+    } else if(result != null) {
+      averageState.updateSelectedAverage(Firestore.instance.collection('users').document(userID),result['id'],true);
+      averageState.setSelectedAverage(result['id']);
     }
   }
 }
@@ -389,7 +385,36 @@ class CategoryGrade extends StatelessWidget {
     return new Text(
       '$_name: ${_grade.toStringAsFixed(2)}%',
       style: new TextStyle(
-        fontSize: 20.0
+          fontSize: 20.0
+      ),
+    );
+  }
+}
+
+class GradeAverageActions extends StatelessWidget {
+  final String userID;
+
+  GradeAverageActions(Key key,this.userID) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final averageState = Provider.of<AverageState>(context);
+    return new Container(
+      child: new Row(
+        children: <Widget>[
+          new IconButton(
+            icon: new Icon(Icons.edit),
+            onPressed: () {
+              openAverageEditDialog(averageState,userID,context);
+            },
+          ),
+          new IconButton(
+            icon: new Icon(Icons.subject),
+            onPressed: () {
+              openAverageDialog(averageState,userID,context);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -427,10 +452,10 @@ class GradeAverageFAB extends StatelessWidget {
 
 Future openCreateCategoryDialog(averageState,context) async {
   CategoryDialogData category = await Navigator.of(context).push(new MaterialPageRoute<CategoryDialogData>(
-    builder: (BuildContext context) {
-      return new CategoryDialog(new Category("", 100, -1),false);
-    },
-    fullscreenDialog: true
+      builder: (BuildContext context) {
+        return new CategoryDialog(new Category("", 100, -1),false);
+      },
+      fullscreenDialog: true
   ));
   if(category != null) {
     averageState.addCategory(new Category(category.name, category.weight, -1));

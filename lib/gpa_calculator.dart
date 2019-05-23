@@ -21,7 +21,7 @@ class GPACalculator extends StatefulWidget {
     return gpaCalculatorState;
   }
 }
- 
+
 class GPACalculatorState extends State<GPACalculator> {
   int _decimalPlaces = 3;
   bool _empty;
@@ -187,14 +187,14 @@ class GPACalculatorState extends State<GPACalculator> {
                         ),
                         new ThinDivider(),
                         new Column(
-                          children:
-                          _empty ?
-                          [
-                            new Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text('No Classes Added'),
-                            )
-                          ] : _buildClasses(snapshot.data.documents)
+                            children:
+                            _empty ?
+                            [
+                              new Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text('No Classes Added'),
+                              )
+                            ] : _buildClasses(snapshot.data.documents)
                         ),
                       ],
                     ),
@@ -212,7 +212,7 @@ class GPACalculatorState extends State<GPACalculator> {
     DocumentSnapshot doc = await Firestore.instance.collection('users').document(_userID).get();
     return doc.data['average'];
   }
- 
+
   double _getGPA(classes) {
     double sum = 0.0;
     for(var i = 0; i < classes.length; i++) {
@@ -236,6 +236,23 @@ class GPACalculatorState extends State<GPACalculator> {
     } else {
       return sum/classes.length;
     }
+  }
+}
+
+class GPACalculatorActions extends StatelessWidget {
+  final String userID;
+
+  GPACalculatorActions(Key key,this.userID) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      child: new Row(
+        children: <Widget>[
+
+        ],
+      ),
+    );
   }
 }
 

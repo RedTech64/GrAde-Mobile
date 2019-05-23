@@ -4,25 +4,30 @@ import 'grade_average.dart';
 import 'dart:async';
 import 'utils/data_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AverageDialog extends StatelessWidget {
+  final String userID;
   final bool add;
 
-  AverageDialog(this.add);
+  AverageDialog(this.userID,this.add);
 
   Future<List<Widget>> _buildAverageElements(context) async {
-    final userDataState = Provider.of<UserDataState>(context);
-    List averages = await getAverages(userDataState.getUserData);
+    QuerySnapshot averageDocs = await Firestore.instance.collection('users').document(userID).collection('averages').getDocuments();
+    List averages = [];
+    for(DocumentSnapshot averageDoc in averageDocs.documents) {
+      averages.add(averageDoc.data);
+    }
     var list = <Widget>[];
     for(var i = 0; i < averages.length; i++) {
       list.add(new SimpleDialogOption(
         child: new Row(
           children: <Widget>[
             new Text(
-              averages[i]['name'],
-              style: new TextStyle(
-                fontSize: 18.0
-              )
+                averages[i]['name'],
+                style: new TextStyle(
+                    fontSize: 18.0
+                )
             )
           ],
         ),
@@ -39,36 +44,36 @@ class AverageDialog extends StatelessWidget {
     return FutureBuilder(
       future: _buildAverageElements(context),
       builder: (BuildContext context, future) => new SimpleDialog(
-        title: new Text('Select Average'),
-        children: <Widget>[
-          new Divider(),
-          new Column(
-            children: <Widget>[
-              new Column(
-                children: _getMenu(future),
-              ),
-            ],
-          ),
-          add ? new Divider() : new Container(),
-          add ? new SimpleDialogOption(
-            child: new Row(
+          title: new Text('Select Average'),
+          children: <Widget>[
+            new Divider(),
+            new Column(
               children: <Widget>[
-                new Icon(Icons.add),
-                new Text(
-                  ' Add Average',
-                  style: new TextStyle(
-                    fontSize: 18.0
-                  )
+                new Column(
+                  children: _getMenu(future),
                 ),
               ],
             ),
-            onPressed: () {
-              Navigator.pop(context, -1);
-            },
-          ) : new Container(),
-        ]
+            add ? new Divider() : new Container(),
+            add ? new SimpleDialogOption(
+              child: new Row(
+                children: <Widget>[
+                  new Icon(Icons.add),
+                  new Text(
+                      ' Add Average',
+                      style: new TextStyle(
+                          fontSize: 18.0
+                      )
+                  ),
+                ],
+              ),
+              onPressed: () {
+                Navigator.pop(context, -1);
+              },
+            ) : new Container(),
+          ]
       ),
-    ); 
+    );
   }
 
   _getMenu(future) {
