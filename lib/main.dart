@@ -94,7 +94,6 @@ class MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
-    final averageState = Provider.of<AverageState>(context);
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('GrAde'),

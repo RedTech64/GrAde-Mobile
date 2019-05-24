@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'thin_divider.dart';
 import 'dart:async';
 import 'class_dialog.dart';
-import 'gpa_calculator.dart';
 import 'utils/data_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -24,7 +23,7 @@ class Class extends StatelessWidget {
   final int _qp;
   final Color color;
   final LinkData _linkData;
-  String _userID;
+  final String _userID;
 
   Class(this._userID,this._id,this._name,this._grade,this._qp,this.color,this._linkData);
 

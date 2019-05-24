@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'average_dialog.dart';
 import 'class.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ClassDialogData {
   String name;

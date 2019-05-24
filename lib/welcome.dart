@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:GrAde/utils/auth.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:io' show Platform;
 
 class WelcomePageData {
   String uid;

@@ -7,7 +7,6 @@ import 'main.dart';
 import 'loading.dart';
 import 'dart:async';
 import 'thin_divider.dart';
-import 'utils/analytics.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:provider/provider.dart';

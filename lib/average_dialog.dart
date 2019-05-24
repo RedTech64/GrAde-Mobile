@@ -1,9 +1,6 @@
 import 'loading.dart';
 import 'package:flutter/material.dart';
-import 'grade_average.dart';
 import 'dart:async';
-import 'utils/data_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AverageDialog extends StatelessWidget {
