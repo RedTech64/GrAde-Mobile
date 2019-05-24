@@ -25,8 +25,11 @@ class GrAdeApp extends StatelessWidget {
     return new MaterialApp(
       title: 'GrAde',
       home: new ChangeNotifierProvider(
-        builder: (_) => AverageState(),
-        child: new MainView(),
+        builder: (_) => GPAState(),
+        child: new ChangeNotifierProvider(
+          builder: (_) => AverageState(),
+          child: new MainView(),
+        ),
       ),
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder> {
@@ -150,7 +153,7 @@ class MainViewState extends State<MainView> {
       } else {
         _page = gpaCalculator;
         _actions = new GPACalculatorActions(new Key(userID),userID);
-        _fab = new GPACalculatorFAB(new Key(simpleFAB.toString()), simpleFAB);
+        _fab = new GPACalculatorFAB(new Key(simpleFAB.toString()+userID), simpleFAB, userID);
         _currentIndex = 1;
         average = false;
       }

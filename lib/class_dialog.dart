@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'average_dialog.dart';
 import 'class.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ClassDialogData {
   String name;
@@ -19,10 +20,11 @@ class ClassDialog extends StatefulWidget {
   final int qp;
   final bool edit;
   final LinkData linkData;
+  final String userID;
 
-  ClassDialog(this.name,this.grade,this.qp,this.edit,this.linkData);
+  ClassDialog(this.userID,this.name,this.grade,this.qp,this.edit,this.linkData);
 
-  State createState() => new ClassDialogState(name,grade.toDouble(),qp,edit,linkData);
+  State createState() => new ClassDialogState(userID,name,grade.toDouble(),qp,edit,linkData);
 }
 
 class ClassDialogState extends State<ClassDialog> {
@@ -32,8 +34,9 @@ class ClassDialogState extends State<ClassDialog> {
   bool _edit;
   LinkData _linkData;
   var _controller;
+  String userID;
 
-  ClassDialogState(this._name,this._grade,this._qp,this._edit,this._linkData);
+  ClassDialogState(this.userID,this._name,this._grade,this._qp,this._edit,this._linkData);
 
   @override
   void initState() {
@@ -185,7 +188,7 @@ class ClassDialogState extends State<ClassDialog> {
     var result;
     result = await showDialog(
         context: context,
-        builder: (BuildContext context) => new AverageDialog(userData,false)
+        builder: (BuildContext context) => new AverageDialog(userID,false)
     );
     if(result != null) {
       setState(() {

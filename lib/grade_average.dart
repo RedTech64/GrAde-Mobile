@@ -450,7 +450,7 @@ class GradeAverageFAB extends StatelessWidget {
   }
 }
 
-Future openCreateCategoryDialog(averageState,context) async {
+Future openCreateCategoryDialog(AverageState averageState,context) async {
   CategoryDialogData category = await Navigator.of(context).push(new MaterialPageRoute<CategoryDialogData>(
       builder: (BuildContext context) {
         return new CategoryDialog(new Category("", 100, -1),false);

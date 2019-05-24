@@ -4,19 +4,6 @@ import 'package:GrAde/main.dart';
 import 'package:GrAde/category_dialoge.dart';
 import 'analytics.dart';
 
-class UserDataState with ChangeNotifier {
-  UserDataState();
-
-  String userID;
-
-  void setID(data) {
-    userID = data;
-    notifyListeners();
-  }
-
-  String getID() => userID;
-}
-
 class AverageState with ChangeNotifier {
   AverageState();
 
@@ -139,5 +126,43 @@ class AverageState with ChangeNotifier {
     _quickUpdate = 2;
     sendCategoryDeleteEvent(category.name, category.weight);
     notifyListeners();
+  }
+}
+
+class GPAState with ChangeNotifier {
+  GPAState();
+
+  void addClass(userData,name,grade,qp,linkData) async {
+    DocumentReference classDoc = await userData.collection('classes').add({
+      'name': name,
+      'grade': grade,
+      'qp': qp,
+      'linkID': linkData.id,
+      'linkName': linkData.name,
+    });
+    var id = classDoc.documentID;
+    await classDoc.updateData({
+      'id': id,
+    });
+    sendClassAddEvent(name, grade, qp,linkData.linked);
+  }
+
+  void editClass(userData,id,name,grade,qp,linkData) async {
+    await userData.collection('classes').document(id).updateData({
+      'name': name,
+      'grade': grade,
+      'qp': qp,
+      'linkID': linkData.id,
+      'linkName': linkData.name,
+    });
+    sendClassEditEvent(name, grade, qp,linkData.linked);
+  }
+
+  void deleteClass(userData,id) async {
+    DocumentSnapshot c = await userData.collection('classes').document(id).get();
+    bool linked = false;
+    if(c.data['linkID'] != "") linked = true;
+    sendClassDeleteEvent(c.data['name'], c.data['grade'], c.data['qp'],linked);
+    await userData.collection('classes').document(id).delete();
   }
 }

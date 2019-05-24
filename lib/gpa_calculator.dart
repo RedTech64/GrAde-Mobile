@@ -6,9 +6,8 @@ import 'class.dart';
 import 'class_dialog.dart';
 import 'dart:async';
 import 'grade_average.dart';
-import 'utils/analytics.dart';
-
-GPACalculatorState gpaCalculatorState;
+import 'utils/data_provider.dart';
+import 'package:provider/provider.dart';
 
 class GPACalculator extends StatefulWidget {
   final String _userID;
@@ -16,10 +15,7 @@ class GPACalculator extends StatefulWidget {
   GPACalculator(Key key,this._userID) : super(key: key);
 
   @override
-  State createState() {
-    gpaCalculatorState = new GPACalculatorState(_userID);
-    return gpaCalculatorState;
-  }
+  State createState() => new GPACalculatorState(_userID);
 }
 
 class GPACalculatorState extends State<GPACalculator> {
@@ -55,40 +51,6 @@ class GPACalculatorState extends State<GPACalculator> {
     }
   }
 
-  void addClass(name,grade,qp,linkData) async {
-    DocumentReference classDoc = await userData.collection('classes').add({
-      'name': name,
-      'grade': grade,
-      'qp': qp,
-      'linkID': linkData.id,
-      'linkName': linkData.name,
-    });
-    var id = classDoc.documentID;
-    await classDoc.updateData({
-      'id': id,
-    });
-    sendClassAddEvent(name, grade, qp,linkData.linked);
-  }
-
-  void editClass(id,name,grade,qp,linkData) async {
-    await userData.collection('classes').document(id).updateData({
-      'name': name,
-      'grade': grade,
-      'qp': qp,
-      'linkID': linkData.id,
-      'linkName': linkData.name,
-    });
-    sendClassEditEvent(name, grade, qp,linkData.linked);
-  }
-
-  void deleteClass(id) async {
-    DocumentSnapshot c = await userData.collection('classes').document(id).get();
-    bool linked = false;
-    if(c.data['linkID'] != "") linked = true;
-    sendClassDeleteEvent(c.data['name'], c.data['grade'], c.data['qp'],linked);
-    await userData.collection('classes').document(id).delete();
-  }
-
   List<Widget> _buildClasses(classes) {
     var list = <Widget>[];
     num gpa = _getGPA(classes);
@@ -104,7 +66,7 @@ class GPACalculatorState extends State<GPACalculator> {
       if(linkID != "") _updateLinkedData(classes[i]['id'],classes[i]['linkID']);
       if(grade+qp < gpa) color = Colors.red;
       else color = Colors.green;
-      list.add(new Class(id,name,grade,qp,color,new LinkData(classes[i]['linkID'],classes[i]['linkName'])));
+      list.add(new Class(_userID,id,name,grade,qp,color,new LinkData(classes[i]['linkID'],classes[i]['linkName'])));
     }
     return list;
   }
@@ -259,18 +221,20 @@ class GPACalculatorActions extends StatelessWidget {
 class GPACalculatorFAB extends StatelessWidget {
   final Key key;
   final bool simple;
+  final String userID;
 
-  GPACalculatorFAB(this.key,this.simple);
+  GPACalculatorFAB(this.key,this.simple,this.userID);
 
   @override
   Widget build(BuildContext context) {
+    final gpaState = Provider.of<GPAState>(context);
     if(!simple) {
       return new FloatingActionButton.extended(
         heroTag: "btn1",
         label: new Text('Add Class'),
         icon: new Icon(Icons.add_box),
         onPressed: () {
-          openCreateClassDialog(context);
+          openCreateClassDialog(gpaState,userID,context);
         },
       );
     } else {
@@ -278,21 +242,21 @@ class GPACalculatorFAB extends StatelessWidget {
         heroTag: "btn2",
         child: new Icon(Icons.add_box),
         onPressed: () {
-          openCreateClassDialog(context);
+          openCreateClassDialog(gpaState,userID,context);
         },
       );
     }
   }
 }
 
-Future openCreateClassDialog(context) async {
+Future openCreateClassDialog(GPAState gpaState,userID,context) async {
   ClassDialogData c = await Navigator.of(context).push(new MaterialPageRoute<ClassDialogData>(
       builder: (BuildContext context) {
-        return new ClassDialog("",100,0,false,new LinkData("",""));
+        return new ClassDialog(userID,"",100,0,false,new LinkData("",""));
       },
       fullscreenDialog: true
   ));
   if(c != null) {
-    gpaCalculatorState.addClass(c.name, c.grade,c.qp,c.linkData);
+    gpaState.addClass(Firestore.instance.collection('users').document(userID),c.name, c.grade,c.qp,c.linkData);
   }
 }

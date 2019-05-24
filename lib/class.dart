@@ -3,6 +3,9 @@ import 'thin_divider.dart';
 import 'dart:async';
 import 'class_dialog.dart';
 import 'gpa_calculator.dart';
+import 'utils/data_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LinkData {
   String id;
@@ -21,11 +24,13 @@ class Class extends StatelessWidget {
   final int _qp;
   final Color color;
   final LinkData _linkData;
+  String _userID;
 
-  Class(this._id,this._name,this._grade,this._qp,this.color,this._linkData);
+  Class(this._userID,this._id,this._name,this._grade,this._qp,this.color,this._linkData);
 
   @override
   Widget build(BuildContext context) {
+    final gpaState = Provider.of<GPAState>(context);
     return new Column(
       children: <Widget>[
         new ThinDivider(),
@@ -65,10 +70,10 @@ class Class extends StatelessWidget {
                 ),
               ),
               new IconButton(
-                icon: new Icon(Icons.edit),
-                onPressed: () {
-                  _openEditClassDialog(context);
-                }
+                  icon: new Icon(Icons.edit),
+                  onPressed: () {
+                    _openEditClassDialog(Firestore.instance.collection('users').document(_userID),gpaState,context);
+                  }
               ),
             ],
           ),
@@ -85,18 +90,18 @@ class Class extends StatelessWidget {
     }
   }
 
-  Future _openEditClassDialog(context) async {
+  Future _openEditClassDialog(userData,GPAState gpaState,context) async {
     ClassDialogData c = await Navigator.of(context).push(new MaterialPageRoute<ClassDialogData>(
         builder: (BuildContext context) {
-          return new ClassDialog(_name,_grade,_qp,true,_linkData);
+          return new ClassDialog(_userID,_name,_grade,_qp,true,_linkData);
         },
         fullscreenDialog: true
     ));
     if(c != null) {
       if(c.delete) {
-        gpaCalculatorState.deleteClass(_id);
+        gpaState.deleteClass(userData,_id);
       } else {
-        gpaCalculatorState.editClass(_id,c.name,c.grade,c.qp,c.linkData);
+        gpaState.editClass(userData,_id,c.name,c.grade,c.qp,c.linkData);
       }
     }
   }
