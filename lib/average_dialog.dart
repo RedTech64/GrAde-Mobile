@@ -103,7 +103,7 @@ class AverageEditDialogState extends State<AverageEditDialog> {
   @override
   void initState() {
     super.initState();
-    _controller = new TextEditingController(text: _text);
+    _controller = new TextEditingController(text: _name);
   }
 
   @override
