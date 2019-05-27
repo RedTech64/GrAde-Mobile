@@ -50,10 +50,8 @@ Future<SignInData> signInWithGoogle(bool silently) async {
   }
 
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-  user = await _auth.signInWithGoogle(
-    accessToken: googleAuth.accessToken,
-    idToken: googleAuth.idToken,
-  );
+  final AuthCredential credential = GoogleAuthProvider.getCredential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+  user = await _auth.signInWithCredential(credential);
   if(user == null) {
     return new SignInData("", false, false);
   } else {

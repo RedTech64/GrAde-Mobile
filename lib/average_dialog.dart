@@ -94,20 +94,28 @@ class AverageEditDialog extends StatefulWidget {
 
 class AverageEditDialogState extends State<AverageEditDialog> {
   String _name;
+  String _text;
   bool _new;
+  TextEditingController _controller;
 
   AverageEditDialogState(this._name,this._new);
 
   @override
+  void initState() {
+    super.initState();
+    _controller = new TextEditingController(text: _text);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-      title: new Text(_name),
+      title: new Text("Edit Average"),
       content: new TextField(
-        controller: new TextEditingController(
-          text: _name,
-        ),
+        controller: _controller,
         onChanged: (result) {
-          _name = result;
+          setState(() {
+            _text = result;
+          });
         },
       ),
       actions: <Widget>[
@@ -115,19 +123,19 @@ class AverageEditDialogState extends State<AverageEditDialog> {
         new FlatButton(
           child: new Text('DELETE'),
           onPressed: () {
-            Navigator.pop(context, {'name': _name, 'delete': true});
+            Navigator.pop(context, {'name': _text, 'delete': true});
           },
         ),
         new FlatButton(
           child: new Text('CANCEL'),
           onPressed: () {
-            Navigator.pop(context, {'name': _name, 'delete': false});
+            Navigator.pop(context, {'name': _text, 'delete': false});
           },
         ),
         new FlatButton(
           child: _new ? new Text('ADD') : new Text('UPDATE'),
           onPressed: () {
-            Navigator.pop(context, {'name': _name,'delete': false});
+            Navigator.pop(context, {'name': _text,'delete': false});
           },
         ),
       ],

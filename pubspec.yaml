@@ -4,17 +4,17 @@ description: GrAde for mobile
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: "0.2.5+1"
+  firebase_core: any
   keyboard_visibility: any
   provider: any
-  cloud_firestore: "0.8.2+3"
-  firebase_auth: "0.6.6"
-  firebase_messaging: "2.1.0"
-  firebase_analytics: "1.0.6"
-  cupertino_icons: "0.1.2"
-  google_sign_in: "3.2.4"
-  url_launcher: "4.0.3"
-  firebase_remote_config: "0.0.6+1"
+  cloud_firestore: any
+  firebase_auth: any
+  firebase_messaging: any
+  firebase_analytics: any
+  cupertino_icons: any
+  google_sign_in: any
+  url_launcher: any
+  firebase_remote_config: any
 
 flutter:
   uses-material-design: true
