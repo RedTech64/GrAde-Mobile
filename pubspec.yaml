@@ -15,6 +15,7 @@ dependencies:
   google_sign_in: any
   url_launcher: any
   firebase_remote_config: any
+  keyboard_actions: any
 
 flutter:
   uses-material-design: true

@@ -11,6 +11,8 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 import 'utils/data_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:keyboard_actions/keyboard_actions.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 double version = 0.5;
 bool average = true;
@@ -55,9 +57,17 @@ class MainViewState extends State<MainView> {
   int _currentIndex = 0;
   int keyCount = 0;
   DocumentReference userData;
+  bool keyboard = false;
 
   @override
   void initState() {
+    KeyboardVisibilityNotification().addNewListener(
+        onChange: (visible) {
+          setState(() {
+            keyboard = visible;
+          });
+        }
+    );
     super.initState();
     signInWithGoogle(true).then((data) {
       print(data.uid);
@@ -95,6 +105,7 @@ class MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: new AppBar(
         title: new Text('GrAde'),
         backgroundColor: Colors.red,
@@ -107,7 +118,7 @@ class MainViewState extends State<MainView> {
           _actions,
         ],
       ),
-      body: _page,
+      body: new FormKeyboardActions(child: _page),
       bottomNavigationBar: new BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           new BottomNavigationBarItem(
@@ -119,7 +130,7 @@ class MainViewState extends State<MainView> {
         currentIndex: _currentIndex,
         onTap: _changePage,
       ),
-      floatingActionButton: _fab,
+      floatingActionButton: new Visibility(visible: !keyboard,child: _fab),
     );
   }
 

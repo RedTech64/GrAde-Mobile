@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:provider/provider.dart';
 import 'utils/data_provider.dart';
+import 'package:keyboard_actions/keyboard_actions.dart';
+import 'utils/keyboard_config.dart';
 
 bool averageLoaded = false;
 
@@ -37,10 +39,14 @@ class GradeAverageState extends State<GradeAverage> {
   TextEditingController weightController;
   bool keyboard = false;
 
+  FocusNode _nodeText1 = new FocusNode();
+  FocusNode _nodeText2 = new FocusNode();
+
   GradeAverageState(this._userID);
 
   @override
   void initState() {
+    FormKeyboardActions.setKeyboardActions(context, _buildConfig(context));
     KeyboardVisibilityNotification().addNewListener(
         onChange: (visible) {
           keyboard = visible;
@@ -131,6 +137,30 @@ class GradeAverageState extends State<GradeAverage> {
     });
   }
 
+  KeyboardActionsConfig _buildConfig(BuildContext context) {
+    return KeyboardActionsConfig(
+      keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
+      keyboardBarColor: Colors.grey[200],
+      nextFocus: true,
+      actions: [
+        KeyboardAction(
+          focusNode: _nodeText1,
+          closeWidget: Padding(
+            padding: EdgeInsets.all(5.0),
+            child: Text("CLOSE"),
+          ),
+        ),
+        KeyboardAction(
+          focusNode: _nodeText2,
+          closeWidget: Padding(
+            padding: EdgeInsets.all(5.0),
+            child: Text("CLOSE"),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final averageState = Provider.of<AverageState>(context);
@@ -219,6 +249,7 @@ class GradeAverageState extends State<GradeAverage> {
                                 child: new Padding(
                                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
                                   child: new TextField(
+                                    focusNode: _nodeText1,
                                     controller: gradeController,
                                     keyboardType: TextInputType.number,
                                     inputFormatters: [new WhitelistingTextInputFormatter(new RegExp("[0-9]"))],
@@ -251,6 +282,7 @@ class GradeAverageState extends State<GradeAverage> {
                                 child: new Padding(
                                   padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
                                   child: new TextField(
+                                    focusNode: _nodeText2,
                                     controller: weightController,
                                     keyboardType: TextInputType.number,
                                     inputFormatters: [new WhitelistingTextInputFormatter(new RegExp("[0-9]"))],

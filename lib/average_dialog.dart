@@ -94,7 +94,6 @@ class AverageEditDialog extends StatefulWidget {
 
 class AverageEditDialogState extends State<AverageEditDialog> {
   String _name;
-  String _text;
   bool _new;
   TextEditingController _controller;
 
@@ -114,7 +113,7 @@ class AverageEditDialogState extends State<AverageEditDialog> {
         controller: _controller,
         onChanged: (result) {
           setState(() {
-            _text = result;
+            _name = result;
           });
         },
       ),
@@ -123,19 +122,19 @@ class AverageEditDialogState extends State<AverageEditDialog> {
         new FlatButton(
           child: new Text('DELETE'),
           onPressed: () {
-            Navigator.pop(context, {'name': _text, 'delete': true});
+            Navigator.pop(context, {'name': _name, 'delete': true});
           },
         ),
         new FlatButton(
           child: new Text('CANCEL'),
           onPressed: () {
-            Navigator.pop(context, {'name': _text, 'delete': false});
+            Navigator.pop(context, {'name': _name, 'delete': false});
           },
         ),
         new FlatButton(
           child: _new ? new Text('ADD') : new Text('UPDATE'),
           onPressed: () {
-            Navigator.pop(context, {'name': _text,'delete': false});
+            Navigator.pop(context, {'name': _name,'delete': false});
           },
         ),
       ],
