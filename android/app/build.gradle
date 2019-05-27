@@ -30,8 +30,8 @@ android {
         applicationId "com.redtech.grade"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 12
-        versionName "1.2.0"
+        versionCode 13
+        versionName "1.3.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
