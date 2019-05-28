@@ -48,8 +48,12 @@ Future<SignInData> signInWithGoogle(bool silently) async {
       return new SignInData("", false, false);
     }
   }
-
-  final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+  GoogleSignInAuthentication googleAuth;
+  if(googleUser == null) {
+    return new SignInData("", false, false);
+  } else {
+    googleAuth = await googleUser.authentication;
+  }
   final AuthCredential credential = GoogleAuthProvider.getCredential(accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
   user = await _auth.signInWithCredential(credential);
   if(user == null) {
@@ -77,11 +81,17 @@ Future<SignInData> signInAnonymously() async {
 
 Future<void> signOut() async {
   print(_googleSignIn.currentUser);
-  await _googleSignIn.disconnect();
+  try {
+    await _googleSignIn.disconnect();
+  } catch (error) {
+    print(error.toString());
+  }
+  await _googleSignIn.signOut();
   user = null;
   googleUser = null;
   userID = null;
   _googleSignIn = null;
+
   _googleSignIn = new GoogleSignIn();
 }
 

@@ -26,112 +26,120 @@ class WelcomeState extends State<Welcome> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: new Center(
-        child: Column(
-          children: <Widget>[
-            new SizedBox(
-              height: 40.0,
-            ),
-            new Icon(Icons.school, size: 160.0,),
-            new SizedBox(
-              height: 20.0,
-            ),
-            new Text(
-              'Welcome',
-              style: new TextStyle(
-                fontSize: 48.0,
+      body: new SingleChildScrollView(
+        child: new Center(
+          child: Column(
+            children: <Widget>[
+              new SizedBox(
+                height: 40.0,
               ),
-            ),
-            new Text(
-              'to',
-              style: new TextStyle(
-                fontSize: 48.0,
+              new Icon(Icons.school, size: 160.0,),
+              new SizedBox(
+                height: 20.0,
               ),
-            ),
-            new Text(
-              'GrAde',
-              style: new TextStyle(
-                fontSize: 48.0,
+              new Text(
+                'Welcome',
+                style: new TextStyle(
+                  fontSize: 48.0,
+                ),
               ),
-            ),
-            new SizedBox(
-              height: 20.0,
-            ),
-            new Text(
-              'Sign in to get started!',
-              textAlign: TextAlign.center,
-              style: new TextStyle(
-                fontSize: 24.0,
+              new Text(
+                'to',
+                style: new TextStyle(
+                  fontSize: 48.0,
+                ),
               ),
-            ),
-            new SizedBox(
-              height: 20.0,
-            ),
-            _tappedGoogle ? new CircularProgressIndicator() :
-            new RaisedButton(
-              child: new Text(
-                'SIGN IN WITH GOOGLE',
+              new Text(
+                'GrAde',
+                style: new TextStyle(
+                  fontSize: 48.0,
+                ),
+              ),
+              new SizedBox(
+                height: 20.0,
+              ),
+              new Text(
+                'Sign in to get started!',
+                textAlign: TextAlign.center,
                 style: new TextStyle(
                   fontSize: 24.0,
                 ),
               ),
-              color: Colors.redAccent,
-              onPressed: () {
-                setState(() {
-                  _tappedGoogle = true;
-                });
-                signOut();
-                signInWithGoogle(false).then((data) {
-                  if(data.signedin) {
-                    Navigator.pop(context,new WelcomePageData(data.uid, data.simpleFAB));
-                  } else {
-                    setState(() {
-                      _tappedGoogle = false;
-                    });
-                  }
-                });
-              }
-            ),
-            new SizedBox(
-              height: 5.0,
-            ),
-            _tappedAnonymous ? new SizedBox(
-              height: 5.0,
-            ) : new Container(),
-            _tappedAnonymous ? new CircularProgressIndicator() :
-            new FlatButton(
-                child: new Text(
-                  'SIGN IN ANONYMOUSLY',
-                  style: new TextStyle(
-                    fontSize: 16.0,
-                  ),
-                ),
-                onPressed: () {
-                  setState(() {
-                    _tappedAnonymous = true;
-                  });
-                  signOut();
-                  signInAnonymously().then((data) {
-                    if(data.signedin) {
-                      Navigator.pop(context,new WelcomePageData(data.uid, data.simpleFAB));
-                    } else {
+              new SizedBox(
+                height: 20.0,
+              ),
+              new Visibility(
+                visible: !_tappedAnonymous,
+                child: _tappedGoogle ? new CircularProgressIndicator() :
+                new RaisedButton(
+                    child: new Text(
+                      'SIGN IN WITH GOOGLE',
+                      style: new TextStyle(
+                        fontSize: 24.0,
+                      ),
+                    ),
+                    color: Colors.redAccent,
+                    onPressed: () {
                       setState(() {
-                        _tappedAnonymous = false;
+                        _tappedGoogle = true;
+                      });
+                      signOut();
+                      signInWithGoogle(false).then((data) {
+                        print("DATA "+ data.toString());
+                        if(data.signedin) {
+                          Navigator.pop(context,new WelcomePageData(data.uid, data.simpleFAB));
+                        } else {
+                          setState(() {
+                            _tappedGoogle = false;
+                          });
+                        }
                       });
                     }
-                  });
-                }
-            ),
-            new SizedBox(
-              height: 6.0,
-            ),
-            new FlatButton(
-                child: new Text(
-                  'PRIVACY POLICY'
                 ),
-                onPressed: _launchURL
-            ),
-          ],
+              ),
+              new SizedBox(
+                height: 5.0,
+              ),
+              _tappedAnonymous ? new SizedBox(
+                height: 5.0,
+              ) : new Container(),
+              new Visibility(
+                visible: !_tappedGoogle,
+                child: _tappedAnonymous ? new CircularProgressIndicator() : new FlatButton(
+                    child: new Text(
+                      'SIGN IN ANONYMOUSLY',
+                      style: new TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _tappedAnonymous = true;
+                      });
+                      signOut();
+                      signInAnonymously().then((data) {
+                        if(data.signedin) {
+                          Navigator.pop(context,new WelcomePageData(data.uid, data.simpleFAB));
+                        } else {
+                          setState(() {
+                            _tappedAnonymous = false;
+                          });
+                        }
+                      });
+                    }
+                ),
+              ),
+              new SizedBox(
+                height: 6.0,
+              ),
+              new FlatButton(
+                  child: new Text(
+                    'PRIVACY POLICY'
+                  ),
+                  onPressed: _launchURL
+              ),
+            ],
+          ),
         ),
       ),
     );

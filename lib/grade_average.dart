@@ -12,7 +12,6 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:provider/provider.dart';
 import 'utils/data_provider.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
-import 'utils/keyboard_config.dart';
 
 bool averageLoaded = false;
 
@@ -165,7 +164,7 @@ class GradeAverageState extends State<GradeAverage> {
   Widget build(BuildContext context) {
     final averageState = Provider.of<AverageState>(context);
     quickUpdate = averageState.getQU();
-    if(averageState.getSelectedAverage() == null && _selectedAverage != null)
+    if((averageState.getSelectedAverage() == null && _selectedAverage != null) || (averageState.getSelectedAverage() != null && _selectedAverage != null && averageState.getSelectedAverage() != _selectedAverage))
       averageState.setSelectedAverage(_selectedAverage);
     else
       _selectedAverage = averageState.getSelectedAverage();
