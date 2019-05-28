@@ -110,12 +110,12 @@ class MainViewState extends State<MainView> {
         title: new Text('GrAde'),
         backgroundColor: Colors.red,
         actions: <Widget>[
+          _actions,
           new IconButton(
             icon: new Icon(Icons.settings),
             onPressed: () {
               openSettings();
             }),
-          _actions,
         ],
       ),
       body: new FormKeyboardActions(child: _page),
