@@ -14,7 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
-double version = 1.41;
+double version = 1.42;
 bool average = true;
 
 void main() {

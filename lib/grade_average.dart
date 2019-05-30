@@ -45,6 +45,7 @@ class GradeAverageState extends State<GradeAverage> {
 
   @override
   void initState() {
+    print("uid $_userID");
     FormKeyboardActions.setKeyboardActions(context, _buildConfig(context));
     KeyboardVisibilityNotification().addNewListener(
         onChange: (visible) {
@@ -130,12 +131,6 @@ class GradeAverageState extends State<GradeAverage> {
     return list;
   }
 
-  void _uploadCategories() {
-    userData.collection('averages').document(_selectedAverage).updateData({
-      'categories': _categories,
-    });
-  }
-
   KeyboardActionsConfig _buildConfig(BuildContext context) {
     return KeyboardActionsConfig(
       keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
@@ -163,8 +158,8 @@ class GradeAverageState extends State<GradeAverage> {
   @override
   Widget build(BuildContext context) {
     final averageState = Provider.of<AverageState>(context);
-    quickUpdate = averageState.getQU();
-    if((averageState.getSelectedAverage() == null && _selectedAverage != null) || (averageState.getSelectedAverage() != null && _selectedAverage != null && averageState.getSelectedAverage() != _selectedAverage))
+    averageState.setUID(_userID);
+    if((averageState.getSelectedAverage() == null && _selectedAverage != null))
       averageState.setSelectedAverage(_selectedAverage);
     else
       _selectedAverage = averageState.getSelectedAverage();
@@ -174,12 +169,11 @@ class GradeAverageState extends State<GradeAverage> {
         builder: (context, snapshot) {
           if(!snapshot.hasData || snapshot.data.data == null) return new Loading();
           averageLoaded = true;
-          if(quickUpdate == 0) {
-            _categories = snapshot.data['categories'];
-            averageState.setCategories(_categories, false);
+          if(averageState.getQU() == 0) {
+            averageState.setCategories(snapshot.data['categories'], false);
           }
-          if(quickUpdate != 0) quickUpdate--;
-          if(quickUpdate == 1) _uploadCategories();
+          if(averageState.getQU() != 0) averageState.setQU(averageState.getQU()-1);
+          if(averageState.getQU() == 1) averageState.uploadCategories(userData);
           return new SingleChildScrollView(
             child: new Padding(
               padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 100.0),
@@ -201,7 +195,7 @@ class GradeAverageState extends State<GradeAverage> {
                           new Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: new Text(
-                              '${getOverallGrade(_categories).toStringAsFixed(2)}%',
+                              '${getOverallGrade(averageState.getCategories()).toStringAsFixed(2)}%',
                               style: new TextStyle(
                                   fontSize: 34.0
                               ),
@@ -211,7 +205,7 @@ class GradeAverageState extends State<GradeAverage> {
                           new Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: new Column(
-                              children: _categories.map((category) => new CategoryGrade(category['name'], getCategoryGrade(category['grades']))).toList(),
+                              children: averageState.getCategories().map((category) => new CategoryGrade(category['name'], getCategoryGrade(category['grades']))).toList(),
                             ),
                           ),
                         ],
@@ -308,7 +302,7 @@ class GradeAverageState extends State<GradeAverage> {
                           new Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: new Wrap(
-                              children: _buildCategoryChips(_categories),
+                              children: _buildCategoryChips(averageState.getCategories()),
                             ),
                           ),
                           new ThinDivider(),
@@ -337,7 +331,7 @@ class GradeAverageState extends State<GradeAverage> {
                       ),
                     ),
                     new Column(
-                      children: _buildCategoryCards(_categories),
+                      children: _buildCategoryCards(averageState.getCategories()),
                     ),
                   ],
                 ),

@@ -10,10 +10,19 @@ class AverageState with ChangeNotifier {
   int _quickUpdate = 0;
   String _selectedAverage;
   List _categories;
+  String _uid;
+
+  void setUID(uid) {
+    if(uid != _uid) {
+      _uid = uid;
+      _quickUpdate = 0;
+      _selectedAverage = null;
+      _categories = null;
+    }
+  }
 
   void setQU(qu) {
     _quickUpdate = qu;
-    notifyListeners();
   }
 
   void setSelectedAverage(averageID) {
@@ -51,6 +60,7 @@ class AverageState with ChangeNotifier {
     });
     userData.updateData({'selectedAverage': id});
     _selectedAverage = id;
+    notifyListeners();
     sendAverageAddEvent(name);
   }
 
@@ -126,6 +136,13 @@ class AverageState with ChangeNotifier {
     _quickUpdate = 2;
     sendCategoryDeleteEvent(category.name, category.weight);
     notifyListeners();
+  }
+
+  void uploadCategories(userData) {
+    print(_selectedAverage);
+    userData.collection('averages').document(_selectedAverage).updateData({
+      'categories': _categories,
+    });
   }
 }
 
